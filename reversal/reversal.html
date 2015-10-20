@@ -1,0 +1,508 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Experiment | Taak</title>
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/foundation.css">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" />
+    <script src="../js/vendor/modernizr.js"></script>
+    <script src="../js/kinetic-v5.0.1.min.js"></script>
+    <style>
+    #container {
+        background-color: black;
+    }
+    </style>
+</head>
+
+<body>
+
+    <div class="row">
+        <div class="large-8 large-offset-1 columns">
+            <h1>Experiment</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="large-10 small-centered columns">
+            <div class="panel">
+                <h3>Lees de instructie aandachtig!</h3>
+                <p>Twee gekleurde patronen zullen in onderstaand zwart vak verschijnen: <b>gele verticale strepen</b> en <b>blauwe horizontale strepen</b>. Eén van deze patronen is correct en het andere is fout. Je moet telkens het correcte patroon kiezen, zodat je een groene smiley ziet. Op sommige momenten zal de computer je echter zeggen dat je fout was ook al koos je het juiste patroon. Het is jouw taak om bij het patroon te blijven dat meestal correct is. Je zal met trial and error moeten uitvissen welk patroon dat is. <b>Het juiste patroon zal dus vaker beloond worden, niet elke keer!</b>
+                </p>
+
+                <p><b>Bovendien</b> kan de regel op bepaalde momenten veranderen, dat wil zeggen: het andere patroon is nu meestal correct. Volg dan de nieuwe regel en kies voor het nieuwe patroon, zodat je algemeen zoveel mogelijk groene smileys verzamelt over de ganse taak. <b>Het is belangrijk dat je pas voor het andere patroon begint te kiezen op het moment dat je zeker bent dat de regel veranderd is!</b> De regel kan meerdere keren veranderen in de loop van de taak, maar het is onmogelijk te voorspellen wanneer dit 
+                zal gebeuren. Probeer telkens zo snel mogelijk te antwoorden.</p>
+                <p>Als je zeker bent dat je de instructies begrepen hebt, klik dan op de knop onderaan om de taak te starten.</p>
+
+                <div class="row">
+                    <div class="large-8 small-centered columns">
+                        <div id="container"></div>
+                        <p></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-2 small-centered columns">
+                        <a href="#" class="small button" id="runExp">Start!</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    var submitted = false;
+    </script>
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted)
+{window.location='bedankt.html';}"></iframe>
+
+
+    <form action="https://docs.google.com/forms/d/1wfm7qJHLoOtLPZ0voKYmY4V5R78xagF8buKmeX_l3H0/formResponse" method="POST" id="dataform" target="hidden_iframe" onsubmit="submitted=true;">
+
+        <input type="hidden" name="entry.297871845" value="" id="ppn" dir="auto">
+        <input type="hidden" name="entry.1482519923" id="rawData" dir="auto">
+
+        <input type="hidden" name="draftResponse" value="[,,&quot;6116801903347109571&quot;]">
+        <input type="hidden" name="pageHistory" value="0">
+        <input type="hidden" name="fromEmail" value="false">
+        <input type="hidden" name="fbzx" value="6116801903347109571">
+    </form>
+
+
+
+    <script src="../js/vendor/jquery.js"></script>
+    <script src="../js/foundation.min.js"></script>
+    <script>
+    $(document).foundation();
+    </script>
+    <script defer="defer">
+    var trialset = [40, 52, 32]; //nb of trials per set, nr of sets: 40,50,30
+    var prob = .75 //probability of reward
+
+    var trials = generateTrials();
+
+    // possible triallists:
+    // .80: [1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1]
+
+    // .75: [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1]
+
+    //.70: [1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1]; //
+    var resp = -1; //flag for 'received response'
+    var respBox = [];
+    var rewardPos = [];
+    var hit;
+    var datastring = "";
+
+    var locations = {
+        1: [120, 0],
+        2: [240, 120],
+        3: [120, 240],
+        4: [0, 120]
+    };
+
+
+
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    var ppn = getParameterByName('ppn');
+    //ppn = parseInt(ppn);
+
+    if (ppn == null || ppn == "") {
+        ppn = 'dummy';
+    }
+
+    function randrange(lower, upperbound) {
+        // Finds a random integer from 'lower' to 'upperbound-1'
+        return Math.floor(Math.random() * upperbound + lower);
+    }
+
+    // Fisher-Yates shuffle algorithm.
+    // modified from http://sedition.com/perl/javascript-fy.html
+
+    function shuffle(arr, exceptions) {
+        var i;
+        exceptions = exceptions || [];
+        var shufflelocations = new Array();
+        for (i = 0; i < arr.length; i++) {
+            if (exceptions.indexOf(i) == -1) {
+                shufflelocations.push(i);
+            }
+        }
+        for (i = shufflelocations.length - 1; i >= 0; --i) {
+            var loci = shufflelocations[i];
+            var locj = shufflelocations[randrange(0, i + 1)];
+            var tempi = arr[loci];
+            var tempj = arr[locj];
+            arr[loci] = tempj;
+            arr[locj] = tempi;
+        }
+        return arr;
+    }
+
+
+
+
+    var button = document.getElementById('runExp');
+
+    button.addEventListener('click', function() {
+        runExp();
+        button.className += " disabled";
+        this.removeEventListener('click', arguments.callee, false);
+    }, false);
+
+
+
+
+    function loadImages(sources, callback) {
+        var images = {};
+        var loadedImages = 0;
+        var numImages = 0;
+        // get num of sources
+        for (var src in sources) {
+            numImages++;
+        }
+        for (var src in sources) {
+            images[src] = new Image();
+            images[src].onload = function() {
+                if (++loadedImages >= numImages) {
+                    callback(images);
+                }
+            };
+            images[src].src = sources[src];
+        }
+    }
+
+    var sources = {
+        pos: 'img/pos.png',
+        neg: 'img/neg.png'
+    };
+
+
+
+    function generateTrials() {
+        trials = []
+        for (var i = 0; i < trialset.length; i++) {
+
+            var thisProb = 0
+
+            if (i % 2 == 1) {
+                thisProb = 1 - prob
+            } else {
+                thisProb = prob
+            }
+
+            thisProb = Math.round(thisProb * 100) / 100
+
+            var nbones = Math.round(trialset[i] * thisProb)
+            var nbzeros = Math.round(trialset[i] - nbones)
+            var ones = Array.apply(null, new Array(nbones)).map(function() {
+                return 1
+            })
+            var zeros = Array.apply(null, new Array(nbzeros)).map(function() {
+                return 0
+            })
+
+            combined = ones.concat(zeros)
+
+            shuffle(combined)
+
+            trials = trials.concat(combined)
+            return trials
+        }
+    }
+
+
+
+    var stage = new Kinetic.Stage({
+        container: 'container',
+        width: 500,
+        height: 500
+    });
+    var shapesLayer = new Kinetic.Layer();
+
+    function runExp() {
+
+        loadImages(sources, function(images) {
+
+            var smiley = new Kinetic.Image({
+                x: 215,
+                y: 215,
+                image: images.pos,
+                width: 70,
+                height: 70
+            });
+
+
+
+
+            /*
+             * create a group which will be used to combine
+             * multiple simple shapes.  Transforming the group will
+             * transform all of the simple shapes together as
+             * one unit
+             */
+            var group = new Kinetic.Group({
+                x: 80,
+                y: 80,
+                offsetX: 0,
+                offsetY: 0,
+            });
+
+
+
+
+            for (var n = 0; n < 4; n++) {
+                // anonymous function to induce scope
+                (function() {
+                    var i = n + 1;
+                    var box = new Kinetic.Rect({
+                        x: locations[i][0],
+                        y: locations[i][1],
+                        width: 100,
+                        height: 100,
+                        name: locations[i],
+                        stroke: "grey",
+                        strokeWidth: 1,
+                        dash: [5, 5],
+                    });
+
+                    box.on('mouseover', function() {
+                        box.setStroke('grey');
+                        box.dashEnabled(false);
+                        shapesLayer.draw();
+                    });
+
+                    box.on('mouseout', function() {
+                        box.setStroke("grey");
+                        box.dashEnabled(true);
+                        shapesLayer.draw();
+                    });
+
+                    group.add(box);
+
+                    box.on('mousedown touchstart', function() {
+                        respBox = this.name();
+                        if (respBox == String(rewardPos)) {
+                            smiley.setImage(images.pos);
+                            hit = 1;
+                        } else {
+                            smiley.setImage(images.neg);
+                            hit = 0;
+                        }
+                        smiley.show();
+                        resp = 1;
+                        shapesLayer.draw();
+                    });
+
+                })();
+            }
+
+            var blueh = new Kinetic.Group({
+                x: 100,
+                y: 100,
+                offsetX: -90,
+                offsetY: -100
+
+            });
+
+            var pos = [0, 30, 60];
+
+            for (var n = 0; n < 3; n++) {
+                // anonymous function to induce scope
+                (function() {
+                    var i = n;
+                    var line = new Kinetic.Line({
+                        x: 0,
+                        y: pos[i],
+                        points: [0, 0, 80, 0],
+                        name: pos[i],
+                        stroke: "#4c64ae",
+                        strokeWidth: 20
+                    });
+
+                    blueh.add(line);
+                })();
+            }
+
+
+            var yellv = new Kinetic.Group({
+                x: 100,
+                y: 100,
+                offsetX: -100,
+                offsetY: -90
+
+            });
+
+            var pos = [0, 30, 60];
+
+            for (var n = 0; n < 3; n++) {
+                // anonymous function to induce scope
+                (function() {
+                    var i = n;
+                    var line = new Kinetic.Line({
+                        x: pos[i],
+                        y: 0,
+                        points: [0, 0, 0, 80],
+                        name: pos[i],
+                        stroke: "#f0ec33",
+                        strokeWidth: 20
+                    });
+
+                    yellv.add(line);
+                })();
+            }
+
+            var bg = new Kinetic.Rect({
+                x: 0,
+                y: 0,
+                width: 500,
+                height: 500,
+                name: 'bg',
+                fill: "black",
+            });
+
+            shapesLayer.add(bg);
+            shapesLayer.add(yellv);
+            shapesLayer.add(blueh);
+            shapesLayer.add(group);
+            shapesLayer.add(smiley);
+
+            stage.add(shapesLayer);
+
+
+
+            var iti = 0 // for iti (blank)
+            var fb = 0 // for feedback duration
+            var trialnb = 1; //keeps track of current trialnb
+            var condition = 'blue';
+            var bluePos = 0;
+            var yellPos = 0;
+            var prep = -1; // flag for prepare new trial
+            var consistency = 0
+
+
+                function recordTrial(rt) {
+                    if ((condition == 'blue' && respBox == locations[bluePos]) || (condition == 'yellow' && respBox == locations[yellPos])) {
+                        consistency = 1
+                    } else {
+                        consistency = 0
+                    }
+
+                    trialvals = [ppn, prob, trialnb, condition, respBox, bluePos, yellPos, rewardPos, hit, consistency, rt];
+                    trialvals = JSON.stringify(trialvals);
+                    datastring = datastring.concat(trialvals, "\n");
+
+                    console.log(trialvals)
+                }
+
+                function getRandom() {
+                    var num = Math.random();
+                    if (num <= 0.7) return 1;
+                    else return 0;
+                }
+
+                /**
+                 * prepares all stims for current trial/condition
+                 */
+
+                function nextTrial() {
+
+
+                    if (trialnb <= trialset[0] || trialnb > trialset[0] + trialset[1]) {
+                        condition = 'blue'
+                    } else {
+                        condition = 'yellow'
+                    }
+
+                    bluePos = Math.floor((Math.random() * 4) + 1);
+                    yellPos = Math.floor((Math.random() * 4) + 1);
+
+                    while (bluePos == yellPos) {
+                        bluePos = Math.floor((Math.random() * 4) + 1);
+                    }
+
+
+                    if (trials[trialnb - 1] == 1) {
+                        rewardPos = locations[bluePos]
+                    } else {
+                        rewardPos = locations[yellPos]
+                    }
+
+
+
+                    blueh.setX(locations[bluePos][0])
+                    blueh.setY(locations[bluePos][1])
+                    yellv.setX(locations[yellPos][0])
+                    yellv.setY(locations[yellPos][1])
+                    yellv.hide();
+                    blueh.hide();
+
+
+                }
+
+
+                function finishExp() {
+
+                    document.getElementById('ppn').value = ppn;
+                    document.getElementById('rawData').value = datastring;
+                    $('#dataform').submit();
+
+                }
+
+            var anim = new Kinetic.Animation(function(frame) {
+
+                var t = frame.time
+
+                if (trialnb > trials.length) {
+                    smiley.hide();
+                    blueh.hide();
+                    yellv.hide();
+                    group.hide()
+                    this.stop();
+                    finishExp();
+                }
+
+                if (t > fb && prep == 1) {
+                    nextTrial();
+                    prep = -1;
+                } else if (t > fb && t < iti) {
+                    smiley.hide();
+                    blueh.hide();
+                    yellv.hide();
+                    group.listening(false);
+                } else if (resp != -1) {
+                    recordTrial(t - iti);
+                    resp = -1;
+                    prep = 1;
+                    fb = t + 700;
+                    iti = fb + 700;
+                    trialnb++;
+
+                } else {
+                    blueh.show();
+                    yellv.show();
+                    group.listening(true);
+
+                }
+
+
+
+            }, shapesLayer);
+
+            //generateTrials();
+            //console.log(JSON.stringify(trials));
+            smiley.hide();
+            nextTrial();
+            anim.start();
+        });
+    };
+    </script>
+</body>
+
+</html>
