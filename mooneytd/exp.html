@@ -1,0 +1,499 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Experiment | stap 2</title>
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/foundation.css">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" />
+    <script src="../js/vendor/modernizr.js"></script>
+</head>
+
+<body>
+    <div class="row">
+        <div class="large-8 large-offset-1 columns">
+            <h1>Experiment</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="large-10 small-centered columns">
+            <div class="panel">
+                <h3>Let goed op de afbeeldingen!</h3>
+                <p>Klik op de knop om te starten.</p>
+                <div class="row">
+                    <div class="large-8 small-centered columns">
+                        <div id="container"></div>
+                        <p></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-10 small-centered columns" style="text-align: center;">
+                        <div id="label">
+                        </div>
+                        <input type="text" name="responseText" Value="" id="responseText">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-2 small-centered columns">
+                        <a href="#" class="small button" id="expButton">Ok!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    var submitted = false;
+    </script>
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted)
+{window.location='bedankt.html';}"></iframe>
+    <form action="https://docs.google.com/forms/d/1J3GXH0CdnvU4YXFbXHIipqt0MH4hGe2ov37Yqe3ItNA/formResponse" method="POST" id="dataform" target="hidden_iframe" onsubmit="submitted=true;">
+        <input type="hidden" name="entry.2117319447" value="" id="ppn" dir="auto">
+        <input type="hidden" name="entry.365680524" id="rawData" dir="auto">
+        <input type="hidden" name="draftResponse" value="[,,&quot;6116801903347109571&quot;]">
+        <input type="hidden" name="pageHistory" value="0">
+        <input type="hidden" name="fromEmail" value="false">
+        <input type="hidden" name="fbzx" value="6116801903347109571">
+    </form>
+    <script src="../js/vendor/jquery.js"></script>
+    <script src="../js/foundation.min.js"></script>
+    <script>
+    $(document).foundation();
+    </script>
+    <script src="../js/konva.min.js"></script>
+    <script defer="defer">
+    // returns param value from url if name/key given
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    //add param value for key to URL
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?|&])" + key + "=.*?(&|$)", "i");
+        separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, '$1' + key + "=" + value + '$2');
+        } else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+
+
+
+    var ppn = getParameterByName('ppn');
+    ppn = parseInt(ppn);
+    newurl = updateQueryStringParameter('bedankt.html', 'ppn', ppn)
+
+
+    // button that controls exp flow
+    expButton = $('#expButton');
+    responseText = $('#responseText');
+    label = $('#label');
+
+
+
+    responseText.hide();
+
+    function randrange(lower, upperbound) {
+        // Finds a random integer from 'lower' to 'upperbound-1'
+        return Math.floor(Math.random() * upperbound + lower);
+    }
+
+    // Fisher-Yates shuffle algorithm.
+    // modified from http://sedition.com/perl/javascript-fy.html
+
+    function shuffle(arr, exceptions) {
+        var i;
+        exceptions = exceptions || [];
+        var shufflelocations = new Array();
+        for (i = 0; i < arr.length; i++) {
+            if (exceptions.indexOf(i) == -1) {
+                shufflelocations.push(i);
+            }
+        }
+        for (i = shufflelocations.length - 1; i >= 0; --i) {
+            var loci = shufflelocations[i];
+            var locj = shufflelocations[randrange(0, i + 1)];
+            var tempi = arr[loci];
+            var tempj = arr[locj];
+            arr[loci] = tempj;
+            arr[locj] = tempi;
+        }
+        return arr;
+    }
+
+
+    function loadImages(sources, callback) {
+        var trials = new Array();
+        var loadedImages = 0;
+        var numImages = trialInfo.length * 2;
+
+        for (var i = 0; i < trialInfo.length; i++) {
+            trials[i] = {};
+
+            for (var item in trialInfo[i]) {
+                if (item == "gs" || item == "tt") {
+                    trials[i][item] = new Image();
+                    trials[i][item].onload = function() {
+                        if (++loadedImages >= numImages) {
+                            callback(trials);
+                        }
+                    }
+
+                    trials[i][item].src = trialInfo[i][item];
+                } else {
+                    trials[i][item] = trialInfo[i][item]
+                }
+            }
+
+        }
+        return trials //return shuffled trials array
+
+    };
+
+
+
+    var trialInfo = [{
+        tt: 'img/1tt.jpg',
+        gs: 'img/1gs.jpg',
+        label: 'de slang',
+        part: 'een oog',
+    }, {
+        tt: 'img/2tt.jpg',
+        gs: 'img/2gs.jpg',
+        label: 'de kat',
+        part: 'een poot',
+    }];
+
+
+
+
+
+
+    // fully load every images of all trials + create shuffled trials list , then call the start function
+    var trials = loadImages(trialInfo, start);
+
+
+
+
+
+
+
+    function start() {
+
+        //init stage, layer and stimuli
+        var stage = new Konva.Stage({
+            container: 'container',
+            width: 400,
+            height: 400
+        });
+
+        var layer = new Konva.Layer();
+
+        stage.add(layer)
+
+        var img = new Konva.Image({
+            x: stage.getWidth() / 2 - 200,
+            y: stage.getHeight() / 2 - 200,
+            image: trials[0].tt,
+            width: 400,
+            height: 400,
+        });
+
+
+        /*
+        img.filters([Konva.Filters.Blur, Konva.Filters.Noise]);
+
+        var circleX = 100;
+        var circleY = 100;
+
+        var circle = new Konva.Circle({
+            x: circleX,
+            y: circleY,
+            radius: 70,
+            fill: 'blue',
+            opacity: 0.4,
+            stroke: 'black',
+            strokeWidth: 4,
+            draggable: true
+        });
+
+        // add cursor styling
+        circle.on('mouseover', function() {
+            document.body.style.cursor = 'pointer';
+        });
+        circle.on('mouseout', function() {
+            document.body.style.cursor = 'default';
+        });
+
+
+        expButton.bind('click', function() {
+            setState();
+        });
+
+        
+        */
+
+        responseText.keydown(response_handler);
+
+
+
+        var trialnb = 0;
+        var blocknb=0;
+        var state = 0;
+        var datastring = "";
+        var imgperblock = 2;
+        var targetDur = 500;
+        var exposDur = 2000;
+        var iti = 750;
+        var listening = false;
+        var timestart = 0;
+        var prepost= "";
+        
+
+        //states of procedure
+        var NOTSTARTED = 0,
+            PRETEST = 1,
+            POSTTEST = 2
+
+        
+
+        shuffle(trails);    
+        nbofblocks = parseInt(trials.length/2); 
+
+
+        function recordTrial(response, rt) {
+
+
+            if (state==PRETEST) prepost="pre"
+            if (state==POSTTEST) prepost="post"
+
+            trialvals = [ppn, trialnb, blocknb, prepost, response, rt];
+            trialvals = JSON.stringify(trialvals);
+            datastring = datastring.concat(trialvals, "\n");
+            console.log(trialvals);
+
+        }
+
+        function finishExp() {
+
+            document.getElementById('ppn').value = ppn;
+            document.getElementById('rawData').value = datastring;
+            $('#dataform').submit();
+
+        }
+
+
+        function presentImg(thisImg, dur) {
+
+            img.setImage(thisImg);
+            img.show()
+            layer.draw();
+
+            
+            setTimeout(function() {
+                img.hide();
+                layer.draw();
+                label.html("Type in het vak wat je gezien hebt. Doe een gokje als je het niet (zeker) weet.");
+                label.show()
+                responseText.show()
+                responseText.focus();
+                timestart = new Date().getTime();
+                listening = true;
+            }, dur);
+
+
+        }
+
+        function getCoords(shape) {
+            var coords = [shape.getX(), shape.getY()];
+            shape.setX(circleX); //reset to starting position
+            shape.setY(circleY);
+            return coords;
+        }
+
+
+
+        var response_handler = function(e) {
+            if (!listening) return;
+
+            var keyCode = e.keyCode,
+                thisResp;
+
+            var code = e.which; // recommended to use e.which, it's normalized across browsers
+
+            if (code == 13) {
+                thisResp = responseText.val();
+                var rt = new Date().getTime() - timestart;
+                listening = false;
+                recordTrial(response, rt);
+                responseText.hide();
+                responseText.val('');
+                
+                setTimeout(function() {
+                    next()
+                }, iti);
+                
+            }
+        };
+
+        var next = function() {
+            if (stims.length === 0) {
+                finish();
+            } else {
+                stim = stims.shift();
+                presentImg(stim.tt, targetDur);
+               
+            }
+        };
+
+        function runExposure(gsSet) {
+                // runs exposure phase
+
+                // present instructions
+                // randomize set
+                // for GS in this set
+                for (GSnb = 0; GSnb < imgperblock; GSnb++) {
+                    presentImg(set[TTnb].gs, exposDur);
+                }
+            }
+
+        function exp() {
+
+                //run experiment: loop through blocks
+
+                // make sets for blocks
+
+                for (blocknb = 0; blocknb < blocks.length; blocknb++) {
+
+                    runTest("pre", blocknb, thisSet)
+                    runExposure(gsSet)
+                    runTest("post", blocknb, thisSet)
+
+                }
+
+                finishExp()
+
+            }
+
+            function setState() {
+                //console.log(state);
+                state++;
+
+
+                if (state == 5) {
+                    hotspotGS = getCoords(circle);
+                    circle.remove();
+                    img.clearCache();
+                    img.remove();
+                    responseText.hide();
+                    label.hide();
+                    responseText.val('');
+                    trialnb++
+                    recordTrial(thisResp, hotspotTT, hotspotGS);
+                    state = 1;
+                    if (trialnb >= trials.length) {
+                        finishExp()
+                        state = 0
+                        return 1
+                    }
+
+                };
+
+                if (state == NOTSTARTED) {
+                    circle.remove()
+                    img.remove()
+                    responseText.hide();
+                    label.hide();
+                }
+
+                if (state == PRESENTTT) {
+                    circle.remove()
+                    label.html("Type in dit vak wat hierboven afgebeeld is. Doe een gokje als je het niet (zeker) weet.");
+                    img.setImage(trials[trialnb].tt);
+                    layer.add(img);
+                    expButton.show();
+                    label.show()
+                    responseText.show();
+                }
+
+                if (state == SOLVEGS) {
+                    circle.remove()
+                    thisResp = responseText.val();
+                    expButton.hide();
+                    responseText.hide();
+                    img.setImage(trials[trialnb].gs);
+                    layer.add(img);
+                    label.html("<h1>" + trials[trialnb]['label'] + "</h1>");
+                    label.show();
+                    setTimeout(function() {
+                        setState();
+                    }, 3000);
+                }
+
+                if (state == PICKTT) {
+                    responseText.hide();
+                    var question = "<p>Geef aan waar <b>" + trials[trialnb]['part'] + "</b> van <b>" + trials[trialnb]['label'] + "</b> is door de blauwe cirkel op dit deel van de afbeelding te slepen. Probeer zo dicht mogelijk in de buurt te komen als je het niet zeker weet. Druk op de knop om je antwoord te bevestigen.</p>";
+                    label.html(question);
+                    img.setImage(trials[trialnb].tt);
+                    layer.add(circle);
+                    layer.add(img);
+                    layer.add(circle);
+                    expButton.show();
+                    label.show();
+
+                }
+                if (state == PICKGS) {
+                    responseText.hide();
+                    hotspotTT = getCoords(circle)
+                    var question = "<p>Geef aan waar <b>" + trials[trialnb]['part'] + "</b> van <b>" + trials[trialnb]['label'] + "</b> is door de blauwe cirkel op dit deel van de afbeelding te slepen. Probeer zo dicht mogelijk in de buurt te komen als je het niet zeker weet. Druk op de knop om je antwoord te bevestigen.</p>";
+                    label.html(question);
+                    img.setImage(trials[trialnb].gs);
+                    img.cache()
+                    img.noise(.7);
+                    layer.add(circle);
+                    layer.add(img);
+                    expButton.show();
+
+                }
+
+                layer.draw();
+            }
+
+
+
+        }
+
+        //for (var i = 0; i < imgs.length; i++) {
+        //    var img = new Kinetic.Image({
+        //        image: trials[i],
+        //    });
+        //    layer.add(img);
+
+        //}
+        //layer.draw();
+    </script>
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+    (function(b, o, i, l, e, r) {
+        b.GoogleAnalyticsObject = l;
+        b[l] || (b[l] =
+            function() {
+                (b[l].q = b[l].q || []).push(arguments)
+            });
+        b[l].l = +new Date;
+        e = o.createElement(i);
+        r = o.getElementsByTagName(i)[0];
+        e.src = 'http://www.google-analytics.com/analytics.js';
+        r.parentNode.insertBefore(e, r)
+    }(window, document, 'script', 'ga'));
+    ga('create', 'UA-XXXXX-X');
+    ga('send', 'pageview');
+    </script>
+</body>
+
+</html>
