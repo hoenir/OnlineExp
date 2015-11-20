@@ -22,10 +22,28 @@
     <div class="row">
         <div class="large-10 small-centered columns">
             <div class="panel">
-                <h3>Lees de instructies op de volgende pagina aandachtig</h3>
-
+                <h3>Lees de instructies aandachtig</h3>
+                <p>
+                    <i>Doe dit experiment bij voorkeur in een Chrome, Firefox of Safari browser</i>
+                </p>
+                <p>Dit experiment bestaat uit twee fasen die je een aantal keer afwisselend zal doen.
+                <ul>
+                <li>
+                    In de ene fase (ACTIEF) zie je vervormde afbeeldingen waarbij je telkens moet proberen raden wat erop staat.
+                        Let op de afbeeldingen worden maar kort getoond. Daarna type je je antwoord in en druk op enter om te bevestigen. Eén woord is voldoende.
+                        Als je het niet zeker weet, doe dan een gok. Probeer zoveel mogelijk te gokken, maar als je helemaal niks hebt kunnen ontwaren,
+                        laat het vak dan open en druk gewoon op enter.
+                </li>
+                <li>
+                    In de andere fase (PASSIEF) hoef je enkel aandachtig te kijken naar de afbeeldingen die passeren.
+                    De afbeeldingen veranderen automatisch na enkele seconden, dus neem ze goed in je op.
+                </li>
+            </ul>
+                    Wanneer de fase verandert zal telkens aangegeven worden.
+                    Sluit aub de andere tabbladen van je browser en probeer deze test zonder onderbreking te doen (ongeveer 20 minuten).
+                </p>
                 <p>Vul je
-                    <b>id code</b> in en klik start om naar de instructies te gaan.</p>
+                    <b>id code (EMS)</b> in en klik <b>start</b> om naar het experiment te gaan.</p>
                 <div class="row">
                     <div class="large-2 columns">
                         <form id="idform" data-abide="ajax">
@@ -65,10 +83,10 @@
 
 
     $('#idform').on('valid', function() {
-        console.log('valid!');
+        //console.log('valid!');
         newurl = url.concat("?", $('#idform').serialize());
         window.location = newurl;
-        //openwindow(newurl) //if you want full screen popup
+        openwindow(newurl) //if you want full screen popup
     });
 
     function openwindow(url) {
@@ -85,10 +103,12 @@
     });
 
 
+
+    /*
      $.get("http://ipinfo.io", function (response) {
         console.log(response.ip);
     }, "jsonp");
-
+    */
     function updateQueryStringParameter(uri, key, value) {
         var re = new RegExp("([?|&])" + key + "=.*?(&|$)", "i");
         separator = uri.indexOf('?') !== -1 ? "&" : "?";

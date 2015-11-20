@@ -29,9 +29,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="large-10 small-centered columns" style="text-align: center;">
-                        <div id="label">
-                        </div>
+                    <div class="large-10 small-centered columns" style="text-align: center; height:50px;">
                         <input type="text" name="responseText" Value="" id="responseText">
                     </div>
                 </div>
@@ -44,7 +42,7 @@
         </div>
     </div>
     <script type="text/javascript">
-    var submitted = false;
+        var submitted = false;
     </script>
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted)
 {window.location='bedankt.html';}"></iframe>
@@ -60,417 +58,412 @@
     <script src="../js/foundation.min.js"></script>
     <script src="trialInfo.json" type="text/javascript" charset="utf-8"></script>
     <script>
-    $(document).foundation();
+        $(document).foundation();
     </script>
     <script src="../js/konva.min.js"></script>
     <script defer="defer">
-    // returns param value from url if name/key given
-    function getParameterByName(name) {
-        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-            results = regex.exec(location.search);
-        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
-
-    //add param value for key to URL
-    function updateQueryStringParameter(uri, key, value) {
-        var re = new RegExp("([?|&])" + key + "=.*?(&|$)", "i");
-        separator = uri.indexOf('?') !== -1 ? "&" : "?";
-        if (uri.match(re)) {
-            return uri.replace(re, '$1' + key + "=" + value + '$2');
-        } else {
-            return uri + separator + key + "=" + value;
+        // returns param value from url if name/key given
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                results = regex.exec(location.search);
+            return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
         }
-    }
 
-
-
-    var ppn = getParameterByName('ppn');
-    ppn = parseInt(ppn);
-    newurl = updateQueryStringParameter('bedankt.html', 'ppn', ppn)
-
-
-    // button that controls exp flow
-    expButton = $('#expButton');
-    responseText = $('#responseText');
-    label = $('#label');
-
-
-     expButton.click(function() { 
-        init()
-        expButton.off('click');
-        expButton.hide()
-      });
-        
-    responseText.hide();
-
-    function randrange(lower, upperbound) {
-        // Finds a random integer from 'lower' to 'upperbound-1'
-        return Math.floor(Math.random() * upperbound + lower);
-    }
-
-    // Fisher-Yates shuffle algorithm.
-    // modified from http://sedition.com/perl/javascript-fy.html
-
-    function shuffle(arr, exceptions) {
-        var i;
-        exceptions = exceptions || [];
-        var shufflelocations = new Array();
-        for (i = 0; i < arr.length; i++) {
-            if (exceptions.indexOf(i) == -1) {
-                shufflelocations.push(i);
+        //add param value for key to URL
+        function updateQueryStringParameter(uri, key, value) {
+            var re = new RegExp("([?|&])" + key + "=.*?(&|$)", "i");
+            separator = uri.indexOf('?') !== -1 ? "&" : "?";
+            if (uri.match(re)) {
+                return uri.replace(re, '$1' + key + "=" + value + '$2');
+            } else {
+                return uri + separator + key + "=" + value;
             }
         }
-        for (i = shufflelocations.length - 1; i >= 0; --i) {
-            var loci = shufflelocations[i];
-            var locj = shufflelocations[randrange(0, i + 1)];
-            var tempi = arr[loci];
-            var tempj = arr[locj];
-            arr[loci] = tempj;
-            arr[locj] = tempi;
+
+
+
+        var ppn = getParameterByName('ppn');
+        ppn = parseInt(ppn);
+        newurl = updateQueryStringParameter('bedankt.html', 'ppn', ppn)
+
+
+        // button that controls exp flow
+        expButton = $('#expButton');
+        responseText = $('#responseText');
+
+
+        // Find the right method, call on correct element
+        function launchFullScreen(element) {
+            if (element.requestFullScreen) {
+                element.requestFullScreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullScreen) {
+                element.webkitRequestFullScreen();
+            }
         }
-        return arr;
-    }
+
+        function randrange(lower, upperbound) {
+            // Finds a random integer from 'lower' to 'upperbound-1'
+            return Math.floor(Math.random() * upperbound + lower);
+        }
+
+        // Fisher-Yates shuffle algorithm.
+        // modified from http://sedition.com/perl/javascript-fy.html
+
+        function shuffle(arr, exceptions) {
+            var i;
+            exceptions = exceptions || [];
+            var shufflelocations = new Array();
+            for (i = 0; i < arr.length; i++) {
+                if (exceptions.indexOf(i) == -1) {
+                    shufflelocations.push(i);
+                }
+            }
+            for (i = shufflelocations.length - 1; i >= 0; --i) {
+                var loci = shufflelocations[i];
+                var locj = shufflelocations[randrange(0, i + 1)];
+                var tempi = arr[loci];
+                var tempj = arr[locj];
+                arr[loci] = tempj;
+                arr[locj] = tempi;
+            }
+            return arr;
+        }
 
 
-    function loadImages(sources, callback) {
-        var trials = new Array();
-        var loadedImages = 0;
-        var numImages = trialInfo.length * 2;
+        function loadImages(sources, callback) {
+            var trials = new Array();
+            var loadedImages = 0;
+            var numImages = TRIALINFO.length * 2;
 
-        for (var i = 0; i < TRIALINFO.length; i++) {
-            trials[i] = {};
+            for (var i = 0; i < TRIALINFO.length; i++) {
+                trials[i] = {};
 
-            for (var item in TRIALINFO[i]) {
-                if (item == "gs" || item == "tt") {
-                    trials[i][item] = new Image();
-                    trials[i][item].onload = function() {
-                        if (++loadedImages >= numImages) {
-                            callback(trials);
+                for (var item in TRIALINFO[i]) {
+                    if (item == "gs" || item == "tt") {
+                        trials[i][item] = new Image();
+                        trials[i][item].onload = function() {
+                            if (++loadedImages >= numImages) {
+                                callback(trials);
+                            }
                         }
+
+                        trials[i][item].src = TRIALINFO[i][item];
+                    } else {
+                        trials[i][item] = TRIALINFO[i][item]
                     }
-
-                    trials[i][item].src = TRIALINFO[i][item];
-                } else {
-                    trials[i][item] = TRIALINFO[i][item]
                 }
-            }
-
-        }
-        return trials //return shuffled trials array
-
-    };
-
-
-
-
-    // fully load every images of all trials + create shuffled trials list , then call the start function
-    var trials = loadImages(TRIALINFO, start);
-
-
-
-
-
-
-
-    function start() {
-
-        //init stage, layer and stimuli
-        var stage = new Konva.Stage({
-            container: 'container',
-            width: 400,
-            height: 400
-        });
-
-        var layer = new Konva.Layer();
-
-        stage.add(layer)
-
-        var img = new Konva.Image({
-            x: stage.getWidth() / 2 - 200,
-            y: stage.getHeight() / 2 - 200,
-            image: trials[0].tt,
-            width: 400,
-            height: 400,
-            visible: false
-        });
-
-
-        var instructxt = new Konva.Text({
-            x: 20,
-            y: 60,
-            text: 'COMPLEX TEXT\n\nAll the world\'s a stage, and all the men and women merely players. They have their exits and their entrances.',
-            fontSize: 18,
-            fontFamily: 'Calibri',
-            fill: '#555',
-            width: 300,
-            padding: 20,
-            align: 'center',
-            visible: false
-        });
-
-        var rect = new Konva.Rect({
-            x: 20,
-            y: 60,
-            stroke: '#555',
-            strokeWidth: 5,
-            fill: '#ddd',
-            width: 300,
-            height: instructxt.getHeight(),
-            shadowColor: 'black',
-            shadowBlur: 10,
-            shadowOffset: [10, 10],
-            shadowOpacity: 0.2,
-            cornerRadius: 10,
-            visible: false
-        });
-
-        layer.add(img);
-        layer.add(instructxt);
-        layer.add(rect);
-
-
-        responseText.keydown(response_handler);
-
-
-
-        var trialnb = 0;
-        var blocknb = 0;
-        var state = 0;
-
-        var trialsperblock = 2;
-        var blocks = [];
-
-        var datastring = "";
-        var targetDur = 500;
-        var exposDur = 2000;
-        var iti = 750;
-        var listening = false;
-        var timestart = 0;
-        var prepost = "";
-
-
-        //states of procedure
-        var PRETEST = 0,
-            EXPOS = 1,
-            POSTTEST = 2
-        var intrial= false  
-
-
-
-
-        nbofblocks = parseInt(trials.length / trialsperblock);
-
-
-        function recordTrial(response, rt) {
-
-
-            if (state == PRETEST) prepost = "pre"
-            if (state == POSTTEST) prepost = "post"
-
-            trialvals = [ppn, trialnb, blocknb, prepost, response, rt];
-            trialvals = JSON.stringify(trialvals);
-            datastring = datastring.concat(trialvals, "\n");
-            console.log(trialvals);
-
-        }
-
-        function finish() {
-
-            document.getElementById('ppn').value = ppn;
-            document.getElementById('rawData').value = datastring;
-            $('#dataform').submit();
-
-        }
-
-
-        function presentImg(thisImg, dur) {
-
-            img.setImage(thisImg);
-            img.show()
-            layer.draw();
-            msg = "Type wat je gezien hebt"
-            instructxt.setText = msg
-
-
-            setTimeout(function() {
-                img.hide();
-                instructxt.show()
-                rect.show()
-                layer.draw();
-
-                
-                responseText.show()
-                responseText.focus();
-
-                timestart = new Date().getTime();
-                listening = true;
-            }, dur);
-
-
-        }
-
-        function getCoords(shape) {
-            var coords = [shape.getX(), shape.getY()];
-            shape.setX(circleX); //reset to starting position
-            shape.setY(circleY);
-            return coords;
-        }
-
-
-
-        var response_handler = function(e) {
-            if (!listening) return;
-
-            var keyCode = e.keyCode,
-                thisResp;
-
-            var code = e.which; // recommended to use e.which, it's normalized across browsers
-
-            if (code == 13) {
-
-
-                listening = false;
-                instructxt.hide()
-                rect.hide()
-                layer.draw()
-                if (intrial) finishTrial()
-                else next()
 
             }
+            return trials //return trials array
+
         };
 
-        function finishTrial() {
 
-            thisResp = responseText.val();
-            var rt = new Date().getTime() - timestart;            
-            recordTrial(response, rt);
+
+
+        // fully load every images of all trials + create trials list , then call the start function
+        var trials = loadImages(TRIALINFO, start);
+
+
+
+
+
+
+
+        function start() {
+
+            //init stage, layer and stimuli
+            var stage = new Konva.Stage({
+                container: 'container',
+                width: 400,
+                height: 400
+            });
+
+            var layer = new Konva.Layer();
+
+            stage.add(layer)
+
+            var img = new Konva.Image({
+                x: stage.getWidth() / 2 - 200,
+                y: stage.getHeight() / 2 - 200,
+                image: trials[0].tt,
+                width: 400,
+                height: 400,
+                visible: false
+            });
+
+
+            var instructxt = new Konva.Text({
+                x: stage.getWidth() / 2 - 150,
+                y: stage.getHeight() / 2 - 200,
+                text: 'COMPLEX TEXT\n\nAll the world\'s a stage, and all the men and women merely players. They have their exits and their entrances.',
+                fontSize: 18,
+                fontFamily: 'Calibri',
+                fill: '#555',
+                width: 300,
+                padding: 20,
+                align: 'center',
+                visible: false
+            });
+
+            var rect = new Konva.Rect({
+                x: stage.getWidth() / 2 - 150,
+                y: stage.getHeight() / 2 - 200,
+                stroke: '#555',
+                strokeWidth: 5,
+                fill: '#ddd',
+                width: 300,
+                height: instructxt.getHeight(),
+                shadowColor: 'black',
+                shadowBlur: 10,
+                shadowOffset: [10, 10],
+                shadowOpacity: 0.2,
+                cornerRadius: 10,
+                visible: false
+            });
+
+            layer.add(img);
+            layer.add(rect);
+            layer.add(instructxt);
+
+
+            responseText.keydown(response_handler);
+
+
+
+            var trialnb = 0;
+            var blocknb = 0;
+            var state = 0;
+
+            var trialsperblock = 10;
+            var blocks = [];
+
+            var datastring = "";
+            var targetDur = 1000;
+            var exposDur = 2000;
+            var iti = 750;
+            var listening = false;
+            var timestart = 0;
+            var prepost = "";
+
+
+            //states of procedure
+            var PRETEST = 0,
+                EXPOS = 1,
+                POSTTEST = 2
+            var intrial = false
+
+
+
+
+            nbofblocks = parseInt(trials.length / trialsperblock);
+            //console.log(nbofblocks);
+
+
+            expButton.click(function() {
+                // Launch fullscreen for browsers that support it!
+                launchFullScreen(document.documentElement); // the whole page
+                init()
+                expButton.off('click');
+                expButton.hide()
+            });
+
+
+
+
+
             responseText.hide();
-            responseText.val('');
-            intrial = false
 
-            //intertrial interval
-            setTimeout(function() {
-                next()
-            }, iti);
-        }
 
-        var next = function() {
+            function recordTrial(response, rt) {
 
-            if (state == EXPOS) {
-                expose(blocks[blocknr]);
-            } else if (trialnb == trialsperblock) {
-                state++
-                trialnb = 0 //reset trial counter
-                if (state > POSTTEST) {
-                    state = PRETEST //reset state counter
-                    blocknr++ // set to next block
 
-                }
-                if (blocknr == nbofblocks) finish()
-                else instruction() // show instruction
+                if (state == PRETEST) prepost = "pre"
+                if (state == POSTTEST) prepost = "post"
 
-            } else { //run trials
-                intrial = true
-                stim = blocks[blocknr][trialnb];
-                presentImg(stim.tt, targetDur);
-                trialnb++
+                thisStim = blocks[blocknb][trialnb].tt.src
+                trialvals = [ppn, trialnb, blocknb, prepost, thisStim, response, rt];
+                trialvals = JSON.stringify(trialvals);
+                datastring = datastring.concat(trialvals, "\n");
+                console.log(trialvals);
+
             }
-        };
 
-        function instruction() {
+            function finish() {
 
-            if (state == EXPOS) msg = "Kijk aandachtig naar alle afbeeldingen"
-            else msg = "Type wat je gezien hebt"
+                document.getElementById('ppn').value = ppn;
+                document.getElementById('rawData').value = datastring;
+                $('#dataform').submit();
 
-            instructxt.setText = msg
-
-            instructxt.show()
-            rect.show()
-            layer.draw()
-            listening = true // wait for key
-
-        }
+            }
 
 
+            function presentImg(thisImg, dur) {
 
-        function expose(block) {
-            // runs exposure phase
-
-            img.hide();
-            layer.draw();
-
-            block.shuffle() //randomize order
-                // present instructions
-            var i = 0
-
-            setTimeout(function repeat() {
-                thisImg = block[i].gs
                 img.setImage(thisImg);
                 img.show()
                 layer.draw();
-                i++;
-                if (i < trialsperblock) {
-                    setTimeout(repeat(), exposDur)
-                } else {
-                    state = POSTTEST
-                    img.hide()
-                    next()
-                }
-            }, exposDur)
+                msg = "Type hieronder wat je gezien hebt (1 woord)."
+                instructxt.setText(msg)
+                rect.setHeight(instructxt.getHeight())
+                instructxt.setFill("#555")
+                rect.setStroke("#555")
 
-        }
-
-
-
-        function init() {
+                setTimeout(function() {
+                    img.hide();
+                    rect.show()
+                    instructxt.show()
+                    layer.draw();
 
 
-            // make img sets for blocks
-            shuffle(trails);
+                    responseText.show()
+                    responseText.focus();
 
-            for (i = 0; i < nbofblocks; i++) {
+                    timestart = new Date().getTime();
+                    listening = true;
+                }, dur);
 
-                thisBlock = trials.slice(i * trialsperblock, (i * trialsperblock) + trialsperblock)
-                blocks.push(thisBlock)
+
             }
 
-            next() //start experiment
+
+
+            var response_handler = function(e) {
+                if (!listening) return;
+
+                var code = e.which; // recommended to use e.which, it's normalized across browsers
+
+                if (code == 13) {
+
+
+                    listening = false;
+                    instructxt.hide()
+                    rect.hide()
+                    layer.draw()
+                    if (intrial) finishTrial()
+                    else next()
+
+                }
+            };
+
+            function finishTrial() {
+
+                thisResp = responseText.val();
+                var rt = new Date().getTime() - timestart;
+                recordTrial(thisResp, rt);
+                responseText.hide();
+                responseText.val('');
+                intrial = false
+                trialnb++
+
+                //intertrial interval
+                setTimeout(function() {
+                    next()
+                }, iti);
+            }
+
+            var next = function() {
+
+                //console.log(blocknb, trialnb, state);
+                if (state == EXPOS) {
+                    expose(blocks[blocknb]);
+                } else if (trialnb == trialsperblock) {
+                    state++
+                    trialnb = 0 //reset trial counter
+                    if (state > POSTTEST) {
+                        state = PRETEST //reset state counter
+                        blocknb++ // set to next block
+
+                    }
+                    if (blocknb == nbofblocks) finish()
+                    else instruction() // show instruction
+
+                } else { //run trials
+                    intrial = true
+                    stim = blocks[blocknb][trialnb];
+                    presentImg(stim.tt, targetDur);
+
+                }
+            };
+
+            function instruction() {
+
+                if (state == EXPOS) msg = "PASSIEF\nKijk aandachtig naar alle afbeeldingen"
+                else msg = "ACTIEF\nType voor elke vervormde afbeelding wat je gezien hebt. 1 woord is voldoende. Gok zoveel mogelijk! Druk op enter om te bevestigen."
+
+                if (state == PRETEST) msg = "SET " + String(blocknb + 1) + " VAN " + String(nbofblocks) + "\n\n" + msg
+
+                shuffle(blocks[blocknb]) //for every new phase randomize order of images
+                instructxt.setText(msg)
+                rect.setHeight(instructxt.getHeight())
+                instructxt.setFill('#008cba')
+                rect.setStroke('#008cba')
+
+                instructxt.show()
+                rect.show()
+                layer.draw()
+                listening = true // wait for key
+
+            }
+
+
+
+            function expose(block) {
+                // runs exposure phase
+
+                img.hide();
+                layer.draw();
+
+                // present instructions
+                var i = 0
+
+
+                function repeat() {
+
+                    if (i < trialsperblock) {
+                        thisImg = block[i].gs
+                        img.setImage(thisImg);
+                        img.show()
+                        layer.draw();
+                        i++;
+                        setTimeout(repeat, exposDur)
+                    } else {
+                        state = POSTTEST
+                        img.hide()
+                        instruction()
+                    }
+                }
+                repeat();
+
+            }
+
+
+
+            function init() {
+
+
+                // make img sets for blocks
+                shuffle(trials);
+
+                for (i = 0; i < nbofblocks; i++) {
+
+                    thisBlock = trials.slice(i * trialsperblock, (i * trialsperblock) + trialsperblock)
+                    blocks.push(thisBlock)
+                }
+
+                $("body").keydown(response_handler);
+                instruction() //start experiment
+
+
+            }
 
 
         }
-
-        init()
-
-
-    }
-
-    //for (var i = 0; i < imgs.length; i++) {
-    //    var img = new Kinetic.Image({
-    //        image: trials[i],
-    //    });
-    //    layer.add(img);
-
-    //}
-    //layer.draw();
     </script>
-    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-    <script>
-    (function(b, o, i, l, e, r) {
-        b.GoogleAnalyticsObject = l;
-        b[l] || (b[l] =
-            function() {
-                (b[l].q = b[l].q || []).push(arguments)
-            });
-        b[l].l = +new Date;
-        e = o.createElement(i);
-        r = o.getElementsByTagName(i)[0];
-        e.src = 'http://www.google-analytics.com/analytics.js';
-        r.parentNode.insertBefore(e, r)
-    }(window, document, 'script', 'ga'));
-    ga('create', 'UA-XXXXX-X');
-    ga('send', 'pageview');
-    </script>
+
 </body>
 
 </html>
