@@ -84,7 +84,12 @@
 
 
         var ppn = getParameterByName('ppn');
-        ppn = parseInt(ppn);
+        //ppn = parseInt(ppn);
+
+        if (ppn == null || ppn == "") {
+            ppn = 'dummy';
+        }
+
         newurl = updateQueryStringParameter('bedankt.html', 'ppn', ppn)
 
 
