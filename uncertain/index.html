@@ -1,0 +1,128 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Experiment | Welcome</title>
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/foundation.css">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" />
+    <script src="../js/vendor/modernizr.js"></script>
+</head>
+
+<body>
+
+    <div class="row">
+        <div class="large-10 large-offset-1 columns">
+            <h1>Welkom in het experiment!</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="large-10 small-centered columns">
+            <div class="panel">
+                <h3>Lees de instructie aandachtig!</h3>
+                <p>Twee gekleurde patronen zullen in onderstaand zwart vak verschijnen: <b>gele verticale strepen</b> en <b>blauwe horizontale strepen</b>. Eén van deze patronen is correct en het andere is fout. Je moet telkens het correcte patroon kiezen,
+                    zodat je een groene smiley ziet. Op sommige momenten zal de computer je echter zeggen dat je fout was ook al koos je het juiste patroon. Het is jouw taak om bij het patroon te blijven dat meestal correct is. Je zal met trial and error
+                    moeten uitvissen welk patroon dat is. <b>Het juiste patroon zal dus vaker beloond worden, niet elke keer!</b>
+                </p>
+
+                <p><b>Bovendien</b> kan de regel op bepaalde momenten veranderen, dat wil zeggen: het andere patroon is nu meestal correct. Volg dan de nieuwe regel en kies voor het nieuwe patroon, zodat je algemeen zoveel mogelijk groene smileys verzamelt
+                    over de ganse taak. <b>Het is belangrijk dat je pas voor het andere patroon begint te kiezen op het moment dat je zeker bent dat de regel veranderd is!</b> De regel kan meerdere keren veranderen in de loop van de taak, maar het is
+                    onmogelijk te voorspellen wanneer dit zal gebeuren. Probeer telkens zo snel mogelijk te antwoorden.</p>
+                <p>Als je zeker bent dat je de instructies begrepen hebt, klik dan op de knop onderaan om de taak te starten.</p>
+
+                <p>Vul je
+                    <b>id code</b> in en klik start om naar de instructies te gaan.</p>
+                <div class="row">
+                    <div class="large-2 columns">
+                        <form id="idform" data-abide="ajax">
+                            <input type="text" name="ppn" Value="" id="ppn" required>
+                            <small class="error">Geef een id code aub.</small>
+                            <button type="submit">Start!</button>
+                        </form>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="large-4 large-offset-7 columns">
+            <a href="http://www.gestaltrevision.be">
+                <img src="../img/headerlogo.png" alt="gestaltrevision">
+            </a>
+        </div>
+    </div>
+
+
+
+    <script src="../js/vendor/jquery.js"></script>
+    <script src="../js/foundation.min.js"></script>
+    <script src="../js/foundation/foundation.abide.js"></script>
+    <script>
+    $(document).foundation();
+    </script>
+    <script defer="defer">
+    var ppn = ""
+
+    url = "reversal.html"
+
+
+
+
+    $('#idform').on('valid', function() {
+        console.log('valid!');
+        newurl = url.concat("?", $('#idform').serialize());
+        window.location = newurl;
+        //openwindow(newurl) //if you want full screen popup
+    });
+
+    function openwindow(url) {
+                                popup = window.open(url,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+screen.availWidth+',height='+screen.availHeight+'');
+                                popup.onunload = function() { location.reload(true) }
+                        }
+
+
+    $(document).keypress(function(event) {
+        if (event.keyCode == 13) {
+            $('#idform').submit();
+
+        }
+    });
+
+
+
+
+    function updateQueryStringParameter(uri, key, value) {
+        var re = new RegExp("([?|&])" + key + "=.*?(&|$)", "i");
+        separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        if (uri.match(re)) {
+            return uri.replace(re, '$1' + key + "=" + value + '$2');
+        } else {
+            return uri + separator + key + "=" + value;
+        }
+    }
+    </script>
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+    (function(b, o, i, l, e, r) {
+        b.GoogleAnalyticsObject = l;
+        b[l] || (b[l] =
+            function() {
+                (b[l].q = b[l].q || []).push(arguments)
+            });
+        b[l].l = +new Date;
+        e = o.createElement(i);
+        r = o.getElementsByTagName(i)[0];
+        e.src = '//www.google-analytics.com/analytics.js';
+        r.parentNode.insertBefore(e, r)
+    }(window, document, 'script', 'ga'));
+    ga('create', 'UA-XXXXX-X');
+    ga('send', 'pageview');
+    </script>
+</body>
+
+</html>

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../css/foundation.css">
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" />
     <script src="../js/vendor/modernizr.js"></script>
-    <script src="../js/kinetic-v5.0.1.min.js"></script>
+    <script src="../js/konva.min.js"></script>
     <style>
         #container {
             background-color: black;
@@ -28,17 +28,7 @@
     <div class="row">
         <div class="large-10 small-centered columns">
             <div class="panel">
-                <h3>Lees de instructie aandachtig!</h3>
-                <p>Twee gekleurde patronen zullen in onderstaand zwart vak verschijnen: <b>gele verticale strepen</b> en <b>blauwe horizontale strepen</b>. Eén van deze patronen is correct en het andere is fout. Je moet telkens het correcte patroon kiezen,
-                    zodat je een groene smiley ziet. Op sommige momenten zal de computer je echter zeggen dat je fout was ook al koos je het juiste patroon. Het is jouw taak om bij het patroon te blijven dat meestal correct is. Je zal met trial and error
-                    moeten uitvissen welk patroon dat is. <b>Het juiste patroon zal dus vaker beloond worden, niet elke keer!</b>
-                </p>
-
-                <p><b>Bovendien</b> kan de regel op bepaalde momenten veranderen, dat wil zeggen: het andere patroon is nu meestal correct. Volg dan de nieuwe regel en kies voor het nieuwe patroon, zodat je algemeen zoveel mogelijk groene smileys verzamelt
-                    over de ganse taak. <b>Het is belangrijk dat je pas voor het andere patroon begint te kiezen op het moment dat je zeker bent dat de regel veranderd is!</b> De regel kan meerdere keren veranderen in de loop van de taak, maar het is
-                    onmogelijk te voorspellen wanneer dit zal gebeuren. Probeer telkens zo snel mogelijk te antwoorden.</p>
-                <p>Als je zeker bent dat je de instructies begrepen hebt, klik dan op de knop onderaan om de taak te starten.</p>
-
+                <p>Klik op de knop om te starten.</p>
                 <div class="row">
                     <div class="large-8 small-centered columns">
                         <div id="container"></div>
@@ -47,7 +37,7 @@
                 </div>
                 <div class="row">
                     <div class="large-2 small-centered columns">
-                        <a href="#" class="small button" id="runExp">Start!</a>
+                        <a href="#" class="small button" id="expButton">Start!</a>
                     </div>
 
                 </div>
@@ -80,45 +70,37 @@
         $(document).foundation();
     </script>
     <script defer="defer">
-        var trialset = [40, 52, 32]; //nb of trials per set, nr of sets: 40,50,30
-        var prob = .75 //probability of reward
-
-        var trials = generateTrials();
-
-        // possible triallists:
-        // .80: [1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1]
-
-        // .75: [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1]
-
-        //.70: [1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1]; //
-        var resp = -1; //flag for 'received response'
-        var respBox = [];
-        var rewardPos = [];
-        var hit;
-        var datastring = "";
-
         var locations = {
-            0: [0, 120],
-            1: [240, 120]
+            0: [70, 180],
+            1: [310, 180]
         };
+
 
         var sources = {
             pos: 'img/pos.png',
-            neg: 'img/neg.png'
+            neg: 'img/neg.png',
+            "000": 'img/bcs.png',
+            "100": 'img/gcs.png',
+            "010": 'img/bts.png',
+            "110": 'img/gts.png',
+            "001": 'img/bcd.png',
+            "101": 'img/gcd.png',
+            "111": 'img/gtd.png',
+            "011": 'img/btd.png',
         };
 
         var dims = {
-            0: "kleur",
-            1: "vorm",
-            2: "patroon",
+            0: "kleur", // blauw=b=0, geel=g=1
+            1: "vorm", // cirkel=c=0, triangle=t=1
+            2: "patroon", //strepen=s=0, dots=d=1
         }
 
         var kleur = {
-            0: blauw
-            1: rood
+            0: "blauw",
+            1: "groen"
         }
 
-        stimPairs = [
+        var stimPairs = [
             [
                 [0, 0, 0],
                 [1, 1, 1]
@@ -136,6 +118,15 @@
                 [1, 0, 1]
             ]
         ]
+
+        var stimPairSingleDim = [
+            [0, 1, 1],
+            [1, 1, 1]
+        ]
+
+        var expButton = $('#expButton');
+
+
 
 
         function getParameterByName(name) {
@@ -181,16 +172,16 @@
         }
 
 
-
-        var button = document.getElementById('runExp');
-
-        button.addEventListener('click', function() {
-            runExp();
-            button.className += " disabled";
-            this.removeEventListener('click', arguments.callee, false);
-        }, false);
-
-
+        // Find the right method, call on correct element
+        function launchFullScreen(element) {
+            if (element.requestFullScreen) {
+                element.requestFullScreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullScreen) {
+                element.webkitRequestFullScreen();
+            }
+        }
 
 
         function loadImages(sources, callback) {
@@ -210,337 +201,398 @@
                 };
                 images[src].src = sources[src];
             }
+            return images
         }
 
 
-        function include(arr, obj) {
-            return (arr.indexOf(obj) != -1);
-        }
 
-        function generateTrials() {
+        var images = loadImages(sources, runExp)
 
-            var blocks = []
-            var blockSizes = [30, 20, 20, 40]
-            var cuedList = [true, true, true, false]
-            var switchProbs = [0, 0, 0, .35]
-            var rewardProbs = [.75, .8, .8, .8]
-            var nbofdimsList = [1, 3, 3, 3]
-            var nbofblocks = blockSizes.length
-
-            for (var i = 0; i < nbofblocks; i++) {
-
-                var block = {
-                    rewardProb : rewardProbs[i],
-                    nbofdims : nbofdimsList[i],
-                    nboftrials : blockSizes[i],
-                    relevantDim : Math.floor(Math.random() * nbofdimsList[i]), // random selection of relevant dimension in this block
-                    rewardedFeat : Math.floor(Math.random() * 2), // random selection of rewarded feature in this block
-                    switchProb : switchProbs[i], // stable block : 0
-                    cued : cuedList[i],
-                    trials : []
-                };
+        function runExp() {
 
 
-                for (var i = 0; i < block.nboftrials; i++) {
+          var iti = 800 // for iti (blank)
+          var fbdur = 1000 // for feedback duration
+          var cuedur = 2000 // duration of cue
+          var trialnb = 0; //keeps track of current trialnb
+          var blocknb = 0
+          var timestart = 0;
+          var pointsEarned = 0;
+          var listening = false;
 
-                    var trial = {}
+          var blocks = []
+          var trial = {}
+          var block = {}
+          var datastring = ""
 
+            var stage = new Konva.Stage({
+                container: 'container',
+                width: 500,
+                height: 500
+            });
+            var layer = new Konva.Layer();
 
-                    thisStimPair = stimPairs[randrange(0, stims.length)] //pick a stimulus pair
-                    thisValidStim = 0
-
-                    if (i % 2 == 1) thisStim.reverse() // reverse order of pair for half of the cases
-
-                    if (thisStim[1][block.relevantDim] == block.rewardedFeat) thisValidStim = 1 // if the second of the pair has the rewarded feature
-
-
-                    var random = Math.random();
-                    var thisRewardedStim
-                    var thisValid
-
-                    if (random < block.rewardProb) {
-                        var thisValid = 1;
-                        var thisRewardedStim = thisValidStim
-                    } else {
-                        thisValid = 0;
-                        if (thisValidStim == 0) thisRewardedStim = 1
-                        if (thisValidStim == 1) thisRewardedStim = 0
-                    }
-
-                    var trial = {
-                        stimPair : thisStimPair
-                        valid : thisValid  // is it a valid trial?
-                        validStim : thisValidStim // which stim holds rewarded feature for current rule
-                        rewardedStim : thisRewardedStim
-                    }
-
-                    trials.push(trial)
+            var bg = new Konva.Rect({
+                x: 0,
+                y: 0,
+                width: 500,
+                height: 500,
+                name: 'bg',
+                fill: "black",
+            });
 
 
+            var smiley = new Konva.Image({
+                x: 215,
+                y: 215,
+                image: images.pos,
+                width: 70,
+                height: 70,
+                visible: false,
+            });
+
+            var limg = new Konva.Image({
+                x: locations[0][0],
+                y: locations[0][1],
+                image: images["010"],
+                width: 120,
+                height: 120,
+                visible: false
+            });
+
+            var rimg = new Konva.Image({
+                x: locations[1][0],
+                y: locations[1][1],
+                image: images["001"],
+                width: 120,
+                height: 120,
+                visible: false
+            });
+
+            var instructxt = new Konva.Text({
+                x: stage.getWidth()/2-150,
+                y: stage.getHeight()/2,
+                text: 'COMPLEX TEXT\n\nAll the world\'s a stage.',
+                fontSize: 18,
+                fontFamily: 'Calibri',
+                fill: 'white',
+                width: 300,
+                padding: 20,
+                align: 'center',
+                visible: false
+            });
+
+            var points = new Konva.Text({
+                x: stage.getWidth()-250,
+                y: stage.getHeight()-50,
+                text: "Total points: " + String(pointsEarned),
+                fontSize: 18,
+                fontFamily: 'Calibri',
+                fill: 'white',
+                width: 300,
+                padding: 20,
+                align: 'center',
+                visible: true
+            });
+
+            var rect = new Konva.Rect({
+                x: stage.getWidth()/2-150,
+                y: stage.getHeight()/2,
+                stroke: 'white',
+                strokeWidth: 5,
+                fill: 'white',
+                width: 300,
+                height: instructxt.getHeight(),
+                shadowColor: 'white',
+                shadowBlur: 10,
+                shadowOffset: [10, 10],
+                shadowOpacity: 0.2,
+                cornerRadius: 10,
+                visible: false
+            });
 
 
+            /*
+             * create a group which will be used to combine
+             * multiple simple shapes.  Transforming the group will
+             * transform all of the simple shapes together as
+             * one unit
+             */
+            var group = new Konva.Group({
+                x: 0,
+                y: 0,
+                offsetX: 0,
+                offsetY: 0,
+            });
+
+            for (var n = 0; n < 2; n++) {
+
+
+                var box = new Konva.Rect({
+                    x: locations[n][0],
+                    y: locations[n][1],
+                    width: 120,
+                    height: 120,
+                    name: String(n),
+                    stroke: "grey",
+                    strokeWidth: 1,
+                    dash: [5, 5],
+                });
+
+                box.on('mouseover', function() {
+
+                    this.dashEnabled(false);
+                    this.strokeWidth(3);
+                    layer.draw();
+                });
+
+                box.on('mouseout', function() {
+                    this.dashEnabled(true);
+                    this.strokeWidth(1);
+                    layer.draw();
+                });
+
+                group.add(box);
+
+                box.on('mousedown touchstart', function() {
+
+                    if (!listening) return
+
+                    trial.rt = new Date().getTime() - timestart;
+                    trial.respBox = parseInt(this.name());
+                    this.strokeWidth(3);
+                    feedback()
+                });
+            }
+
+
+
+
+
+
+            layer.add(bg);
+            layer.add(rimg);
+            layer.add(limg);
+            layer.add(group);
+            layer.add(smiley);
+            layer.add(rect);
+            layer.add(points);
+            layer.add(instructxt);
+
+            stage.add(layer);
+
+
+
+
+
+
+            expButton.click(function() {
+                // Launch fullscreen for browsers that support it!
+                //launchFullScreen(document.documentElement); // the whole page
+                init()
+                expButton.off('click');
+                expButton.hide()
+            });
+
+
+            function feedback() {
+
+                if (trial.respBox == trial.rewardedStim) {
+                    smiley.setImage(images.pos);
+                    trial.acc = 1;
+                    pointsEarned++
+                    var pointstxt = "Total points: " + String(pointsEarned)
+                    points.setText(pointstxt)
+                } else {
+                    smiley.setImage(images.neg);
+                    trial.acc = 0;
                 }
-                block.trials = trials
-                blocks.push(block)
+
+                points.show()
+                smiley.show()
+                layer.draw();
+
+                recordTrial();
+
+                setTimeout(function() {
+                    smiley.hide();
+                    limg.hide()
+                    rimg.hide()
+                    layer.draw();
+
+                    setTimeout(function() {
+                        trialnb++;
+                        next()
+                    }, iti)
+
+                }, fbdur);
+            }
+
+            function instruction(block) {
+
+                msg = "LET OP: Enkel" + String(dims[blocks[blocknb].relevantDim]) + "is relevant!"
+
+                instructxt.setText(msg)
+                rect.height(instructxt.getHeight())
+                instructxt.fill('#008cba')
+                rect.stroke('#008cba')
+
+                instructxt.show()
+                rect.show()
+                layer.draw()
+
+                setTimeout(function() {
+                    instructxt.hide();
+                    rect.hide()
+                    layer.draw();
+                    next()
+
+                }, cuedur);
+            }
+
+            function presentTrial() {
+
+                limg.setImage(images[trial.stimPair[0].join("")]);
+                rimg.setImage(images[trial.stimPair[1].join("")]);
+                limg.show()
+                rimg.show()
+
+                layer.draw();
+                listening = true
+
+                timestart = new Date().getTime();
+            }
+
+            function recordTrial(respBox, acc, rt) {
+
+                if (trial.respBox == trial.validStim) {
+                    trial.consistency = 1
+                } else {
+                    trial.consistency = 0
+                }
+
+                var trialvals = JSON.stringify(trial);
+                console.log(trialvals)
+                datastring = datastring.concat(trialvals, "\n");
 
 
             }
 
+            function finishExp() {
+
+                document.getElementById('ppn').value = ppn;
+                document.getElementById('rawData').value = datastring;
+                $('#dataform').submit();
+
+            }
+
+            var next = function() {
+
+                //console.log(blocknb, trialnb);
+                if (trialnb == blocks[blocknb].nboftrials) {
+                    trialnb = 0 //reset trial counter
+                    blocknb++ // set to next block
+                    block = blocks[blocknb]
+
+                    if (blocknb == nbofblocks) finish()
+                    else if (block.cued) instruction() // show cue
+                    else next()
+
+                } else { //run trials
+                    trial = blocks[blocknb].trials[trialnb];
+                    presentTrial();
+                }
+            };
+
+            function generateTrials() {
+
+
+                var blockSizes = [30, 20, 20, randrange(25, 35), randrange(25, 35)]
+                var cuedList = [true, true, true, false, false]
+                var rewardProbs = [.75, .8, .8, .8, .8]
+                var nbofdimsList = [1, 3, 3, 3, 3] // only 1 or 3 dims are supported for now
+                var nbofblocks = blockSizes.length
+
+                for (var i = 0; i < nbofblocks; i++) {
+
+
+                    var block = {
+                        rewardProb: rewardProbs[i],
+                        nbofdims: nbofdimsList[i],
+                        nboftrials: blockSizes[i],
+                        relevantDim: randrange(0, nbofdimsList[i]), // random selection of relevant dimension in this block
+                        rewardedFeat: randrange(0, 2), // random selection of rewarded feature in this block
+                        cued: cuedList[i],
+                        trials: []
+                    };
+
+                    if (i > 0) { //make sure there is a switch relative to previous block
+                        while (block.nbofdims != 1 && block.relevantDim == blocks[i - 1].relevantDim) {
+                            block.relevantDim = randrange(0, nbofdimsList[i])
+                        }
+                        while (block.rewardedFeat == blocks[i - 1].rewardedFeat) {
+                            block.rewardedFeat = randrange(0, 2)
+                        }
+                    }
+
+                    for (var j = 0; j < block.nboftrials; j++) {
+
+                        if (block.nbofdims == 1) {
+                            thisStimPair = stimPairSingleDim.slice()
+                        } else thisStimPair = stimPairs[randrange(0, stimPairs.length)].slice() //pick a stimulus pair
+
+                        shuffle(thisStimPair) // reverse order of pair for half of the cases
+
+                        var thisValidStim = 0
+                        if (thisStimPair[1][block.relevantDim] == block.rewardedFeat) thisValidStim = 1 // if the second of the pair has the rewarded feature
+
+                        var random = Math.random();
+
+                        if (random < block.rewardProb) {
+                            var thisValid = true;
+                            var thisRewardedStim = thisValidStim
+                        } else {
+                            thisValid = false;
+                            if (thisValidStim == 0) thisRewardedStim = 1
+                            if (thisValidStim == 1) thisRewardedStim = 0
+                        }
+
+                        var trial = {
+                            ppn: ppn,
+                            blocknb: i,
+                            trialnb: j,
+                            nboftrials: block.nboftrials,
+                            stimPair: thisStimPair,
+                            valid: thisValid, // is it a valid trial? (boolean)
+                            validStim: thisValidStim, // which stim holds rewarded feature for current rule
+                            rewardedStim: thisRewardedStim, //which stim holds stim that is rewarded on this trial
+                            rewardProb: block.rewardProb,
+                            nbofdims: block.nbofdims,
+                            relevantDim: block.relevantDim, // random selection of relevant dimension in this block
+                            rewardedFeat: block.rewardedFeat, // random selection of rewarded feature in this block
+                            cued: block.cued
+                        }
+
+                        block.trials.push(trial)
+                    }
+                    blocks.push(block)
+                }
+            }
+
+
+
+
+            function init() {
+                generateTrials();
+                points.show()
+                //console.log(JSON.stringify(trials));
+                instruction();
+
+            }
+
+
 
         }
-
-
-
-        var stage = new Kinetic.Stage({
-            container: 'container',
-            width: 500,
-            height: 500
-        });
-        var shapesLayer = new Kinetic.Layer();
-
-        function runExp() {
-
-            loadImages(sources, function(images) {
-
-                var smiley = new Kinetic.Image({
-                    x: 215,
-                    y: 215,
-                    image: images.pos,
-                    width: 70,
-                    height: 70
-                });
-
-                var limg = new Kinetic.Image({
-                    x: locations[0][0],
-                    y: locations[0][1],
-                    image: images.pos,
-                    width: 70,
-                    height: 70
-                });
-
-                var rimg = new Kinetic.Image({
-                    x: locations[1][0],
-                    y: locations[1][1],
-                    image: images.pos,
-                    width: 70,
-                    height: 70
-                });
-
-
-                /*
-                 * create a group which will be used to combine
-                 * multiple simple shapes.  Transforming the group will
-                 * transform all of the simple shapes together as
-                 * one unit
-                 */
-                var group = new Kinetic.Group({
-                    x: 80,
-                    y: 80,
-                    offsetX: 0,
-                    offsetY: 0,
-                });
-
-
-
-
-                for (var n = 0; n < 2; n++) {
-                    // anonymous function to induce scope
-                    (function() {
-                        var box = new Kinetic.Rect({
-                            x: locations[i][0],
-                            y: locations[i][1],
-                            width: 100,
-                            height: 100,
-                            name: locations[i],
-                            stroke: "grey",
-                            strokeWidth: 1,
-                            dash: [5, 5],
-                        });
-
-                        box.on('mouseover', function() {
-                            box.setStroke('green');
-                            box.setStrokeWidth(3)
-                            box.dashEnabled(false);
-                            shapesLayer.draw();
-                        });
-
-                        box.on('mouseout', function() {
-                            box.setStroke("grey");
-                            box.dashEnabled(true);
-                            shapesLayer.draw();
-                        });
-
-                        group.add(box);
-
-                        box.on('mousedown touchstart', function() {
-                            respBox = this.name();
-                            if (respBox == String(rewardPos)) {
-                                smiley.setImage(images.pos);
-                                hit = 1;
-                            } else {
-                                smiley.setImage(images.neg);
-                                hit = 0;
-                            }
-                            smiley.show();
-                            resp = 1;
-                            shapesLayer.draw();
-                        });
-
-                    })();
-                }
-
-                var blueh = new Kinetic.Group({
-                    x: 100,
-                    y: 100,
-                    offsetX: -90,
-                    offsetY: -100
-
-                });
-
-
-
-                var bg = new Kinetic.Rect({
-                    x: 0,
-                    y: 0,
-                    width: 500,
-                    height: 500,
-                    name: 'bg',
-                    fill: "black",
-                });
-
-                shapesLayer.add(bg);
-                shapesLayer.add(group);
-                shapesLayer.add(smiley);
-
-                stage.add(shapesLayer);
-
-
-
-                var iti = 0 // for iti (blank)
-                var fb = 0 // for feedback duration
-                var trialnb = 1; //keeps track of current trialnb
-                var condition = 'blue';
-                var bluePos = 0;
-                var yellPos = 0;
-                var prep = -1; // flag for prepare new trial
-                var consistency = 0
-
-
-                function recordTrial(rt) {
-                    if ((condition == 'blue' && respBox == locations[bluePos]) || (condition == 'yellow' && respBox == locations[yellPos])) {
-                        consistency = 1
-                    } else {
-                        consistency = 0
-                    }
-
-                    trialvals = [ppn, prob, trialnb, condition, respBox, bluePos, yellPos, rewardPos, hit, consistency, rt];
-                    trialvals = JSON.stringify(trialvals);
-                    datastring = datastring.concat(trialvals, "\n");
-
-                    console.log(trialvals)
-                }
-
-                function getRandom() {
-                    var num = Math.random();
-                    if (num <= 0.7) return 1;
-                    else return 0;
-                }
-
-                /**
-                 * prepares all stims for current trial/condition
-                 */
-
-                function nextTrial() {
-
-
-                    if (trialnb <= trialset[0] || trialnb > trialset[0] + trialset[1]) {
-                        condition = 'blue'
-                    } else {
-                        condition = 'yellow'
-                    }
-
-                    bluePos = Math.floor((Math.random() * 4) + 1);
-                    yellPos = Math.floor((Math.random() * 4) + 1);
-
-                    while (bluePos == yellPos) {
-                        bluePos = Math.floor((Math.random() * 4) + 1);
-                    }
-
-
-                    if (trials[trialnb - 1] == 1) {
-                        rewardPos = locations[bluePos]
-                    } else {
-                        rewardPos = locations[yellPos]
-                    }
-
-
-
-                    blueh.setX(locations[bluePos][0])
-                    blueh.setY(locations[bluePos][1])
-                    yellv.setX(locations[yellPos][0])
-                    yellv.setY(locations[yellPos][1])
-                    yellv.hide();
-                    blueh.hide();
-
-
-                }
-
-
-                function finishExp() {
-
-                    document.getElementById('ppn').value = ppn;
-                    document.getElementById('rawData').value = datastring;
-                    $('#dataform').submit();
-
-                }
-
-                var anim = new Kinetic.Animation(function(frame) {
-
-                    var t = frame.time
-
-                    if (trialnb > trials.length) {
-                        smiley.hide();
-                        blueh.hide();
-                        yellv.hide();
-                        group.hide()
-                        this.stop();
-                        finishExp();
-                    }
-
-                    if (t > fb && prep == 1) {
-                        nextTrial();
-                        prep = -1;
-                    } else if (t > fb && t < iti) {
-                        smiley.hide();
-                        blueh.hide();
-                        yellv.hide();
-                        group.listening(false);
-                    } else if (resp != -1) {
-                        recordTrial(t - iti);
-                        resp = -1;
-                        prep = 1;
-                        fb = t + 700;
-                        iti = fb + 700;
-                        trialnb++;
-
-                    } else {
-                        blueh.show();
-                        yellv.show();
-                        group.listening(true);
-
-                    }
-
-
-
-                }, shapesLayer);
-
-                //generateTrials();
-                //console.log(JSON.stringify(trials));
-                smiley.hide();
-                nextTrial();
-                anim.start();
-            });
-        };
     </script>
 </body>
 

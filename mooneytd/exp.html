@@ -62,6 +62,7 @@
     </script>
     <script src="../js/konva.min.js"></script>
     <script defer="defer">
+
         // returns param value from url if name/key given
         function getParameterByName(name) {
             name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -90,12 +91,12 @@
             ppn = 'dummy';
         }
 
-        newurl = updateQueryStringParameter('bedankt.html', 'ppn', ppn)
+        var newurl = updateQueryStringParameter('bedankt.html', 'ppn', ppn)
 
 
         // button that controls exp flow
-        expButton = $('#expButton');
-        responseText = $('#responseText');
+        var expButton = $('#expButton');
+        var responseText = $('#responseText');
 
 
         // Find the right method, call on correct element
@@ -246,7 +247,7 @@
             var trialsperblock = 10;
             var blocks = [];
 
-            var datastring = "";
+
             var targetDur = 1000;
             var exposDur = 2000;
             var iti = 750;
@@ -289,10 +290,10 @@
                 if (state == PRETEST) prepost = "pre"
                 if (state == POSTTEST) prepost = "post"
 
-                thisStim = blocks[blocknb][trialnb].tt.src
-                trialvals = [ppn, trialnb, blocknb, prepost, thisStim, response, rt];
+                var thisStim = blocks[blocknb][trialnb].tt.src
+                var trialvals = [ppn, trialnb, blocknb, prepost, thisStim, response, rt];
                 trialvals = JSON.stringify(trialvals);
-                datastring = datastring.concat(trialvals, "\n");
+                var datastring = datastring.concat(trialvals, "\n");
                 console.log(trialvals);
 
             }
@@ -311,7 +312,7 @@
                 img.setImage(thisImg);
                 img.show()
                 layer.draw();
-                msg = "Type hieronder wat je gezien hebt (1 woord)."
+                var msg = "Type hieronder wat je gezien hebt (1 woord)."
                 instructxt.setText(msg)
                 rect.setHeight(instructxt.getHeight())
                 instructxt.setFill("#555")
@@ -356,7 +357,7 @@
 
             function finishTrial() {
 
-                thisResp = responseText.val();
+                var thisResp = responseText.val();
                 var rt = new Date().getTime() - timestart;
                 recordTrial(thisResp, rt);
                 responseText.hide();
@@ -388,7 +389,7 @@
 
                 } else { //run trials
                     intrial = true
-                    stim = blocks[blocknb][trialnb];
+                    var stim = blocks[blocknb][trialnb];
                     presentImg(stim.tt, targetDur);
 
                 }
@@ -396,8 +397,8 @@
 
             function instruction() {
 
-                if (state == EXPOS) msg = "PASSIEF\nKijk aandachtig naar alle afbeeldingen"
-                else msg = "ACTIEF\nType voor elke vervormde afbeelding wat je gezien hebt. 1 woord is voldoende. Gok zoveel mogelijk! Druk op enter om te bevestigen."
+                if (state == EXPOS) var msg = "PASSIEF\nKijk aandachtig naar alle afbeeldingen"
+                else var msg = "ACTIEF\nType voor elke vervormde afbeelding wat je gezien hebt. 1 woord is voldoende. Gok zoveel mogelijk! Druk op enter om te bevestigen."
 
                 if (state == PRETEST) msg = "SET " + String(blocknb + 1) + " VAN " + String(nbofblocks) + "\n\n" + msg
 
@@ -451,7 +452,8 @@
 
 
                 // make img sets for blocks
-                shuffle(trials);
+                shuffle(trials); //shuffle images/trials
+                trials = trials.slice(0,60) // pick the first half, full set is too long
 
                 for (i = 0; i < nbofblocks; i++) {
 
