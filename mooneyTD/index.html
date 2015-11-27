@@ -39,7 +39,7 @@
                     De afbeeldingen veranderen automatisch na enkele seconden, dus neem ze goed in je op.
                 </li>
             </ul>
-                    Wanneer de fase verandert zal telkens aangegeven worden.
+                    Er zal telkens aangegeven worden wanneer je naar een andere fase gaat.
                     Sluit aub de andere tabbladen van je browser en probeer deze test zonder onderbreking te doen (ongeveer 20 minuten).
                 </p>
                 <p>Vul je
@@ -85,7 +85,7 @@
     $('#idform').on('valid', function() {
         //console.log('valid!');
         newurl = url.concat("?", $('#idform').serialize());
-        window.location = newurl;
+        //window.location = newurl;
         openwindow(newurl) //if you want full screen popup
     });
 

@@ -90,15 +90,21 @@
         };
 
         var dims = {
-            0: "kleur", // blauw=b=0, geel=g=1
-            1: "vorm", // cirkel=c=0, triangle=t=1
-            2: "patroon", //strepen=s=0, dots=d=1
+            0: "KLEUR", // blauw=b=0, geel=g=1
+            1: "VORM", // cirkel=c=0, triangle=t=1
+            2: "PATROON", //strepen=s=0, dots=d=1
         }
 
         var kleur = {
             0: "blauw",
             1: "groen"
         }
+
+        features = [
+            ["blauw", "groen"],
+            ["cirkel", "driehoek"],
+            ["streepjes", "bolletjes"]
+        ]
 
         var stimPairs = [
             [
@@ -125,6 +131,8 @@
         ]
 
         var expButton = $('#expButton');
+
+
 
 
 
@@ -210,20 +218,25 @@
 
         function runExp() {
 
+            var blockSizes = [30, 20, 20, randrange(25, 35), randrange(25, 35),randrange(25, 35)]
+            var cuedList = [true, true, true, true, false, false]
+            var rewardProbs = [.75, .8, .8, .8, .8, .8]
+            var nbofdimsList = [1, 3, 3, 3, 3, 2] // only 1 or 3 dims are supported for now
+            var nbofblocks = blockSizes.length
 
-          var iti = 800 // for iti (blank)
-          var fbdur = 1000 // for feedback duration
-          var cuedur = 2000 // duration of cue
-          var trialnb = 0; //keeps track of current trialnb
-          var blocknb = 0
-          var timestart = 0;
-          var pointsEarned = 0;
-          var listening = false;
+            var iti = 700 // for iti (blank)
+            var fbdur = 700 // for feedback duration
+            var cuedur = 3000 // duration of cue
+            var trialnb = 0; //keeps track of current trialnb
+            var blocknb = 0
+            var timestart = 0;
+            var pointsEarned = 0;
+            var listening = false;
 
-          var blocks = []
-          var trial = {}
-          var block = {}
-          var datastring = ""
+            var blocks = []
+            var trial = {}
+            var block = {}
+            var datastring = ""
 
             var stage = new Konva.Stage({
                 container: 'container',
@@ -270,8 +283,8 @@
             });
 
             var instructxt = new Konva.Text({
-                x: stage.getWidth()/2-150,
-                y: stage.getHeight()/2,
+                x: stage.getWidth() / 2 - 150,
+                y: stage.getHeight() / 2,
                 text: 'COMPLEX TEXT\n\nAll the world\'s a stage.',
                 fontSize: 18,
                 fontFamily: 'Calibri',
@@ -283,8 +296,8 @@
             });
 
             var points = new Konva.Text({
-                x: stage.getWidth()-250,
-                y: stage.getHeight()-50,
+                x: stage.getWidth() - 250,
+                y: stage.getHeight() - 50,
                 text: "Total points: " + String(pointsEarned),
                 fontSize: 18,
                 fontFamily: 'Calibri',
@@ -296,8 +309,8 @@
             });
 
             var rect = new Konva.Rect({
-                x: stage.getWidth()/2-150,
-                y: stage.getHeight()/2,
+                x: stage.getWidth() / 2 - 150,
+                y: stage.getHeight() / 2,
                 stroke: 'white',
                 strokeWidth: 5,
                 fill: 'white',
@@ -388,7 +401,7 @@
 
             expButton.click(function() {
                 // Launch fullscreen for browsers that support it!
-                //launchFullScreen(document.documentElement); // the whole page
+                launchFullScreen(document.documentElement); // the whole page
                 init()
                 expButton.off('click');
                 expButton.hide()
@@ -428,9 +441,11 @@
                 }, fbdur);
             }
 
-            function instruction(block) {
+            function instruction() {
 
-                msg = "LET OP: Enkel" + String(dims[blocks[blocknb].relevantDim]) + "is relevant!"
+
+                if (blocknb == 3) var msg = "Let op: Vanaf nu geven we de veranderingen niet meer aan!"
+                else var msg = "Let op: Enkel " + String(dims[blocks[blocknb].relevantDim]) + " is relevant!"
 
                 instructxt.setText(msg)
                 rect.height(instructxt.getHeight())
@@ -471,6 +486,9 @@
                     trial.consistency = 0
                 }
 
+                trial.relevantDim = dims[block.relevantDim]
+                trial.rewardedFeat = features[block.relevantDim][block.rewardedFeat]
+
                 var trialvals = JSON.stringify(trial);
                 console.log(trialvals)
                 datastring = datastring.concat(trialvals, "\n");
@@ -507,11 +525,7 @@
             function generateTrials() {
 
 
-                var blockSizes = [30, 20, 20, randrange(25, 35), randrange(25, 35)]
-                var cuedList = [true, true, true, false, false]
-                var rewardProbs = [.75, .8, .8, .8, .8]
-                var nbofdimsList = [1, 3, 3, 3, 3] // only 1 or 3 dims are supported for now
-                var nbofblocks = blockSizes.length
+
 
                 for (var i = 0; i < nbofblocks; i++) {
 
@@ -585,7 +599,8 @@
             function init() {
                 generateTrials();
                 points.show()
-                //console.log(JSON.stringify(trials));
+                    //console.log(JSON.stringify(trials));
+                block = blocks[blocknb]
                 instruction();
 
             }
