@@ -21,7 +21,7 @@
         <div class="large-10 small-centered columns">
             <div class="panel">
                 <h3>Let goed op de afbeeldingen!</h3>
-                <p>Klik op de knop om te starten.</p>
+                <p>Als de Startknop hieronder verschijnt kan je beginnen met een klik erop.</p>
                 <div class="row">
                     <div class="large-8 small-centered columns">
                         <div id="container"></div>
@@ -97,7 +97,8 @@
         // button that controls exp flow
         var expButton = $('#expButton');
         var responseText = $('#responseText');
-
+        expButton.hide();
+        responseText.hide()
 
         // Find the right method, call on correct element
         function launchFullScreen(element) {
@@ -181,6 +182,10 @@
 
         function start() {
 
+
+
+
+
             //init stage, layer and stimuli
             var stage = new Konva.Stage({
                 container: 'container',
@@ -237,7 +242,8 @@
 
 
             responseText.keydown(response_handler);
-
+            expButton.show();
+            
 
 
             var trialnb = 0;

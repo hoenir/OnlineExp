@@ -131,6 +131,7 @@
         ]
 
         var expButton = $('#expButton');
+        expButton.hide()
 
 
 
@@ -218,6 +219,7 @@
 
         function runExp() {
 
+            expButton.show()
             var blockSizes = [30, 15, 15, randrange(25, 35), randrange(25, 35),randrange(25, 35)]
             var cuedList = [true, true, true, true, false, false]
             var rewardProbs = [.75, .8, .8, .8, .8, .8]
