@@ -261,6 +261,7 @@
             var listening = false;
             var timestart = 0;
             var prepost = "";
+            var datastring = "";
 
 
             //states of procedure
@@ -300,7 +301,7 @@
                 var thisStim = blocks[blocknb][trialnb].tt.src
                 var trialvals = [ppn, trialnb, blocknb, prepost, thisStim, response, rt];
                 trialvals = JSON.stringify(trialvals);
-                var datastring = datastring.concat(trialvals, "\n");
+                datastring = datastring.concat(trialvals, "\n");
                 console.log(trialvals);
 
             }
