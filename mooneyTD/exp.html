@@ -170,7 +170,8 @@
 
 
 
-
+        shuffle(TRIALINFO); //shuffle images/trials
+        TRIALINFO = TRIALINFO.slice(0,60) // pick the first half, full set is too long
         // fully load every images of all trials + create trials list , then call the start function
         var trials = loadImages(TRIALINFO, start);
 
@@ -243,7 +244,7 @@
 
             responseText.keydown(response_handler);
             expButton.show();
-            
+
 
 
             var trialnb = 0;
@@ -458,8 +459,7 @@
 
 
                 // make img sets for blocks
-                shuffle(trials); //shuffle images/trials
-                trials = trials.slice(0,60) // pick the first half, full set is too long
+
 
                 for (i = 0; i < nbofblocks; i++) {
 
