@@ -59,6 +59,7 @@
         <input type="hidden" name="entry.1482519923" id="rawData" dir="auto">
         <input type="hidden" name="entry.1580129092" id="rawData2" dir="auto">
         <input type="hidden" name="entry.535192402" id="rawData3" dir="auto">
+        <input type="hidden" name="entry.624547564" id="rawData4" dir="auto">
         <input type="hidden" name="draftResponse" value="[,,&quot;6116801903347109571&quot;]">
         <input type="hidden" name="pageHistory" value="0">
         <input type="hidden" name="fromEmail" value="false">
@@ -506,14 +507,16 @@
             function finish() {
 
                 document.getElementById('ppn').value = ppn;
-                var cutoff=Math.round(datastring.length/3)
+                var cutoff=Math.round(datastring.length/4)
                 var raw = datastring.substring(0, cutoff);
                 var raw2= datastring.substring(cutoff,cutoff+cutoff);
-                var raw3= datastring.substring(cutoff+cutoff,datastring.length);
+                var raw3= datastring.substring(cutoff+cutoff,cutoff+cutoff+cutoff);
+                var raw4= datastring.substring(cutoff+cutoff+cutoff,datastring.length);
 
                 document.getElementById('rawData').value = raw;
                 document.getElementById('rawData2').value = raw2;
                 document.getElementById('rawData3').value = raw3;
+                document.getElementById('rawData4').value = raw4;
 
 
                 var pointstxt = "Finished! Saving data..."
