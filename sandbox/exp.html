@@ -507,16 +507,16 @@
             function finish() {
 
                 document.getElementById('ppn').value = ppn;
-                var cutoff=Math.round(datastring.length/4)
-                var raw = datastring.substring(0, cutoff);
-                var raw2= datastring.substring(cutoff,cutoff+cutoff);
-                var raw3= datastring.substring(cutoff+cutoff,cutoff+cutoff+cutoff);
-                var raw4= datastring.substring(cutoff+cutoff+cutoff,datastring.length);
+                //var cutoff=Math.round(datastring.length/4)
+                //var raw = datastring.substring(0, cutoff);
+                //var raw2= datastring.substring(cutoff,cutoff+cutoff);
+                //var raw3= datastring.substring(cutoff+cutoff,cutoff+cutoff+cutoff);
+                //var raw4= datastring.substring(cutoff+cutoff+cutoff,datastring.length);
 
-                document.getElementById('rawData').value = raw;
-                document.getElementById('rawData2').value = raw2;
-                document.getElementById('rawData3').value = raw3;
-                document.getElementById('rawData4').value = raw4;
+                document.getElementById('rawData').value = datastring;
+                //document.getElementById('rawData2').value = raw2;
+                //document.getElementById('rawData3').value = raw3;
+                //document.getElementById('rawData4').value = raw4;
 
 
                 var pointstxt = "Finished! Saving data..."
