@@ -1,0 +1,340 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Experiment | stap 2</title>
+  <link rel="stylesheet" href="../css/normalize.css">
+  <link rel="stylesheet" href="../css/foundation.css">
+  <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" />
+    <script src="js/vendor/modernizr.js"></script>
+  </head>
+  <body>
+    
+    <div class="row">
+      <div class="large-8 large-offset-1 columns">
+        <h1>Experiment stap 2</h1>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="large-10 small-centered columns">
+        <div class="panel">
+            <h3>Let goed op de afbeeldingen!</h3>
+            <p>Nu krijg je een reeks afbeeldingen te zien. Let goed op want nadien zullen we je vragen om er zoveel mogelijk van te herkennen.</p>
+            <p>Click op de knop om te starten.</p>
+            
+           
+                <div id="container"></div>
+                <div class="row">
+                    <div class="large-2 small-centered columns">
+                    <a href="#" class="small button" id="runExp">Start!</a>
+                    </div>
+                    </div>
+        </div>
+      </div>
+    </div>
+
+ 
+    
+    <script src="../js/vendor/jquery.js"></script>
+    <script src="../js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+    <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.1.min.js"></script>
+    <script defer="defer">
+      
+      
+      var button= document.getElementById('runExp');
+      
+      button.addEventListener('click', function() {
+        runExp();
+        button.className += " disabled";
+        this.removeEventListener('click',arguments.callee,false);
+      }, false);
+      
+    
+      
+      function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+    
+    
+          function updateQueryStringParameter(uri, key, value) {
+      var re = new RegExp("([?|&])" + key + "=.*?(&|$)", "i");
+      separator = uri.indexOf('?') !== -1 ? "&" : "?";
+      if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2');
+      }
+      else {
+        return uri + separator + key + "=" + value;
+      }
+    }
+    
+     
+     
+     var ppn = getParameterByName('ppn'); 
+     ppn = parseInt(ppn); 
+     newurl= updateQueryStringParameter('post.html', 'ppn', ppn)
+      
+      var images =  new Array();
+      
+
+      function loadImages(sources, callback) {
+        
+        var loadedImages = 0;
+        var numImages = sources.length*2;
+        
+        for (var i = 0; i < sources.length; i++) {
+            images[i] = {};
+            
+            for(var pic in sources[i]) {
+                images[i][pic] = new Image();
+                images[i][pic].onload = function() {
+                    if(++loadedImages >= numImages) {
+                        callback(images);
+                    }         
+                }
+                
+                images[i][pic].src = sources[i][pic];
+                
+            }
+           
+      }
+      
+      };
+        
+      var sources = [{
+        twotone: 'img/1tt.jpg',
+        gs: 'img/1gs.jpg'
+      }, {
+        twotone: 'img/2tt.jpg',
+        gs: 'img/2gs.jpg'
+      }, {
+        twotone: 'img/3tt.jpg',
+        gs: 'img/3gs.jpg'
+      }, {
+        twotone: 'img/4tt.jpg',
+        gs: 'img/4gs.jpg'
+      },{
+        twotone: 'img/5tt.jpg',
+        gs: 'img/5gs.jpg'
+      }, {
+        twotone: 'img/6tt.jpg',
+        gs: 'img/6gs.jpg'
+      },{
+        twotone: 'img/7tt.jpg',
+        gs: 'img/7gs.jpg'
+      }, {
+        twotone: 'img/8tt.jpg',
+        gs: 'img/8gs.jpg'
+      },{
+        twotone: 'img/9tt.jpg',
+        gs: 'img/9gs.jpg'
+      }, {
+        twotone: 'img/10tt.jpg',
+        gs: 'img/10gs.jpg'
+      },{
+        twotone: 'img/11tt.jpg',
+        gs: 'img/11gs.jpg'
+      }, {
+        twotone: 'img/12tt.jpg',
+        gs: 'img/12gs.jpg'
+      },{
+        twotone: 'img/13tt.jpg',
+        gs: 'img/13gs.jpg'
+      }, {
+        twotone: 'img/14tt.jpg',
+        gs: 'img/14gs.jpg'
+      },{
+        twotone: 'img/15tt.jpg',
+        gs: 'img/15gs.jpg'
+      }, {
+        twotone: 'img/16tt.jpg',
+        gs: 'img/16gs.jpg'
+      },{
+        twotone: 'img/17tt.jpg',
+        gs: 'img/17gs.jpg'
+      }, {
+        twotone: 'img/18tt.jpg',
+        gs: 'img/18gs.jpg'
+      },{
+        twotone: 'img/19tt.jpg',
+        gs: 'img/19gs.jpg'
+      }, {
+        twotone: 'img/20tt.jpg',
+        gs: 'img/20gs.jpg'
+      },{
+        twotone: 'img/21tt.jpg',
+        gs: 'img/21gs.jpg'
+      }, {
+        twotone: 'img/22tt.jpg',
+        gs: 'img/22gs.jpg'
+      }, {
+        twotone: 'img/23tt.jpg',
+        gs: 'img/23gs.jpg'
+      }, {
+        twotone: 'img/24tt.jpg',
+        gs: 'img/24gs.jpg'
+      },{
+        twotone: 'img/25tt.jpg',
+        gs: 'img/25gs.jpg'
+      }, {
+        twotone: 'img/26tt.jpg',
+        gs: 'img/26gs.jpg'
+      },{
+        twotone: 'img/27tt.jpg',
+        gs: 'img/27gs.jpg'
+      }, {
+        twotone: 'img/28tt.jpg',
+        gs: 'img/28gs.jpg'
+      },{
+        twotone: 'img/29tt.jpg',
+        gs: 'img/29gs.jpg'
+      }, {
+        twotone: 'img/30tt.jpg',
+        gs: 'img/30gs.jpg'
+      },{
+        twotone: 'img/31tt.jpg',
+        gs: 'img/31gs.jpg'
+      }, {
+        twotone: 'img/32tt.jpg',
+        gs: 'img/32gs.jpg'
+      },{
+        twotone: 'img/33tt.jpg',
+        gs: 'img/33gs.jpg'
+      }, {
+        twotone: 'img/34tt.jpg',
+        gs: 'img/34gs.jpg'
+      },{
+        twotone: 'img/35tt.jpg',
+        gs: 'img/35gs.jpg'
+      }, {
+        twotone: 'img/36tt.jpg',
+        gs: 'img/36gs.jpg'
+      },{
+        twotone: 'img/37tt.jpg',
+        gs: 'img/37gs.jpg'
+      }, {
+        twotone: 'img/38tt.jpg',
+        gs: 'img/38gs.jpg'
+      },{
+        twotone: 'img/39tt.jpg',
+        gs: 'img/39gs.jpg'
+      }, {
+        twotone: 'img/40tt.jpg',
+        gs: 'img/40gs.jpg'
+      }];
+    
+
+
+      var stage = new Kinetic.Stage({
+        container: 'container',
+        width: 600,
+        height: 500
+      });
+      var layer = new Kinetic.Layer();
+
+      
+      function runExp() {
+      
+      
+      loadImages(sources, function(images) {
+      
+      
+      var testimg = new Kinetic.Image({
+          x: 350,
+          y: 250,
+          image: images[0].twotone,
+          width: 400,
+          height: 400,
+          offset: {x:200, y:200}
+        });
+
+     
+      layer.add(testimg);
+      stage.add(layer);
+      
+      var count=0;
+      var   TTA = 0,
+            GS = 1,
+            TTB = 2;
+            DONE = 3
+      var base=count*6000
+      
+      var state = TTB;
+      
+      
+      var anim = new Kinetic.Animation(function(frame) {
+        t=frame.time
+        base=count*6000
+        
+        
+        if (t >= images.length*6000) {
+           testimg.remove();
+           state = DONE;
+           this.stop();
+           window.location=newurl;
+           }
+        if (t>base+0 && t<2000+base && state==TTB){ 
+            if (ppn%2==0){
+            testimg.rotation(180);
+            }
+            testimg.setImage(images[count].twotone);
+            state = TTA;
+        };
+        
+        if (t>=2000 + base && t<(base+4000) && state==TTA){ 
+            if (ppn%2==0){
+            testimg.rotation(0);
+            }
+            testimg.setImage(images[count].gs);
+            state = GS;
+        };
+        
+        if (t>=4000 + base && t<base+6000 && state==GS){ 
+            if (ppn%2==0){
+            testimg.rotation(180);
+            }
+            testimg.setImage(images[count].twotone);
+            state = TTB;
+            count++;
+            base=count*6000
+        };
+        
+        
+        
+        
+        
+      }, layer);
+
+      anim.start();
+      
+     
+      });
+      
+      
+      
+      }
+      
+
+      
+
+      
+
+    </script>
+     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-XXXXX-X');ga('send','pageview');
+        </script>
+  </body>
+</html>

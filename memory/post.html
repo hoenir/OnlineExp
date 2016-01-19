@@ -1,0 +1,114 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Experiment | stap 3</title>
+  <link rel="stylesheet" href="../css/normalize.css">
+  <link rel="stylesheet" href="../css/foundation.css">
+  <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700" />
+    <script src="js/vendor/modernizr.js"></script>
+  </head>
+  <body>
+    
+    <div class="row">
+      <div class="large-10 large-offset-1 columns">
+        <h1>Experiment stap 3</h1>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="large-10 small-centered columns">
+        <div class="panel">
+            <h3>Vul in wat je je nog herinnert uit de eerste vragenlijst</h3>
+            <p>Geef hieronder zoveel mogelijk emotie-woorden uit de vragenlijst die je daarnet invulde. Gebruik komma&#39;s tussen de woorden.</p>
+            <p>Klik op verzenden als je klaar bent.</p>
+
+           
+                <div id="container"></div>
+                <div class="row">
+                    <div class="large-10 columns">
+
+<script type="text/javascript">var submitted=false;</script>
+<iframe name="hidden_iframe" id="hidden_iframe"
+style="display:none;" onload="if(submitted)
+{window.location='bedankt.html';}"></iframe>
+
+<form action="https://docs.google.com/forms/d/1BuSgdo3HPKJOfM--cXchiibd28ZLEmxrdNhou4pUUE4/formResponse" method="POST" id="panas" target="hidden_iframe" onsubmit="submitted=true;"  data-abide>           
+ 
+<input type="hidden" name="entry.1455887526" value="" class="ss-q-short" id="ppn" dir="auto">
+<input type="hidden" name="entry.116532823" value="" class="ss-q-short" id="condition" dir="auto" aria-label="Condition  " title="">
+
+<label aria-hidden="true" class="ss-q-item-label" for="entry_1085604222"></label>
+<textarea name="entry.1085604222" rows="10" cols="0" class="ss-q-long" id="entry_1085604222" dir="auto" aria-label="Noem zoveel mogelijk woorden uit de eerste vragenlijst Gebruik komma&#39;s tussen de woorden. "></textarea>
+
+
+<input type="hidden" name="draftResponse" value="[,,&quot;1873192182195584282&quot;]
+">
+<input type="hidden" name="pageHistory" value="0">
+<input type="hidden" name="fromEmail" value="false">
+
+<input type="hidden" name="fbzx" value="1873192182195584282">
+
+<button type="submit">Verzenden!</button>
+</form>
+                    
+                    </div>
+                    </div>
+        </div>
+      </div>
+    </div>
+
+ 
+    
+    <script src="../js/vendor/jquery.js"></script>
+    <script src="../js/foundation.min.js"></script>
+    <script src="../js/foundation/foundation.abide.js"></script>
+    <script>
+      $(document).foundation();
+    </script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['linechart']});
+    </script>
+    <script src="../js/konva.min.js"></script>
+    <script defer="defer">
+    
+    
+        
+       function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+     
+     var ppn = getParameterByName('ppn'); 
+     document.getElementById('ppn').value=ppn;
+     
+     
+     if (parseInt(ppn)%2==0){
+        document.getElementById('condition').value='inverted';
+    }
+    else {document.getElementById('condition').value='upright';}
+    
+    $.get("http://ipinfo.io", function (response) {
+        console.log(response.ip);
+    }, "jsonp");
+     
+    
+     
+      
+
+    </script>
+     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-XXXXX-X');ga('send','pageview');
+        </script>
+  </body>
+</html>

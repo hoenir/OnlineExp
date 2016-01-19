@@ -1,0 +1,120 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<style media="screen">
+table {
+color: #333;
+font-family: Helvetica, Arial, sans-serif;
+width: 640px;
+border-collapse:
+collapse; border-spacing: 0;
+}
+
+td, th {
+border: 1px solid transparent; /* No more visible border */
+height: 30px;
+transition: all 0.3s;  /* Simple transition for hover effect */
+}
+
+th {
+background: #DFDFDF;  /* Darken header a bit */
+font-weight: bold;
+}
+
+td {
+background: #FAFAFA;
+text-align: center;
+}
+
+/* Cells in even rows (2,4,6...) are one color */
+tr:nth-child(even) td { background: #F1F1F1; }
+
+/* Cells in odd rows (1,3,5...) are another (excludes header cells)  */
+tr:nth-child(odd) td { background: #FEFEFE; }
+
+tr td:hover { background: #666; color: #FFF; } /* Hover cell effect! */
+</style>
+</head>
+<body>
+<form id="form">
+  <input type="text" name="id">
+  <button type="submit">submit</button>
+</form>
+
+<table class="w3-table-all" style="width:100%">
+<tr>
+	<th>id</th>
+	<th>var1</th>
+	<th>var2</th>
+	<th>var3</th>
+</tr>
+<tr>
+	<td id="id"></td>
+	<td id="var1"></td>
+	<td id="var2"></td>
+	<td id="var3"></td>
+</tr>
+
+</table>
+
+
+
+  <script defer="defer">
+
+// jQuery snippet for changing HTML form input into JSON format to send to API
+(function ($) {
+  $.fn.serializeFormJSON = function () {
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function () {
+      if (o[this.name]) {
+        if (!o[this.name].push) { o[this.name] = [o[this.name]]; }
+        o[this.name].push(this.value || '');
+      } else { o[this.name] = this.value || ''; }
+    });
+    return o;
+  };
+})(jQuery);
+
+
+
+// to run when submitting the form
+$('#form').submit(function(e) {
+  // prevent default submitting form
+  e.preventDefault();
+
+  // serialize form data to JSON format
+  var data = $('#form').serializeFormJSON();
+
+  // set API url for request, with correct parameter from form
+  var url = 'https://sheetsu.com/apis/v1.0/0a118aa0' + "/" + "id" + "/" + data.id
+
+  $.ajax({
+    url: url,
+    data: data,
+    dataType: 'json',
+    type: 'GET',
+
+    // place for handling successful response
+    // showing (redirecting to) something like /thanks.html
+    //page could be a good idea
+    success: function(data) {
+      //console.log(data[0].id);
+      $('#id').text(data[0].id);
+      $('#var1').text(data[0].var1);
+      $('#var2').text(data[0].var2);
+      $('#var3').text(data[0].var3);
+    },
+
+    // handling error response
+    error: function(data) {
+      console.log(data);
+    }
+  });
+
+  return false;
+});
+</script>
+
+</body>
+</html>

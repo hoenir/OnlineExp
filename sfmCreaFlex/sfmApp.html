@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Bootstrap, from Twitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css" />
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+
+  </head>
+
+  <body>
+
+    <div class="container-fluid">
+
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="hero-unit span6 offset2">
+      <div class="sfm span3 offset1">
+         <canvas id="myCanvas" width='270px' height='270px' style='background-color:black;'></canvas>
+         <p><a class="btn btn-primary btn-block btn-large">Switch!</a></p>
+         <div id="slider"></div>
+      </div>
+
+      </div>
+
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="span4">
+          <h2>Heading</h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+        <div class="span4">
+          <h2>Heading</h2>
+          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+       </div>
+        <div class="span4">
+          <h2>Heading</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+      </div>
+
+      <hr>
+
+      <footer>
+        <p><a href="http://perswww.kuleuven.be/~u0058724/">Contact</a></p>
+      </footer>
+
+    </div> <!-- /container -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+<!-- Load the paper.js library -->
+    <script type="text/javascript" src="https://dl.dropbox.com/u/467457/paper.js"></script>
+<!-- Load the Stats.js library -->
+<script type="text/javascript" src="js/Stats.js"></script>
+<!-- Define inlined PaperScript associate it with myCanvas -->
+<script type="text/paperscript" canvas="myCanvas">
+
+//add stats
+var stats = new Stats();
+stats.setMode(1); // 0: fps, 1: ms
+
+// Align top-left
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '50px';
+
+document.body.appendChild( stats.domElement );
+
+$.getJSON("test.json", function(json) {
+    console.log(json); // this will show the info it in firebug console
+});
+
+// The amount of circles we want to make:
+var count = 150;
+
+var radius = 80;
+var angVelocity = 3;
+var azims = [];
+
+for (var i = 0; i < count; i++) {
+azims.push(Math.random()*360);
+}
+
+var elevs = [];
+
+for (var i = 0; i < count; i++) {
+elevs.push(Math.random()*180-90);
+}
+
+
+//degrees to radians
+function radians(degrees){
+    return degrees*Math.PI/180.0;
+}
+
+
+/*
+// create global container
+var rectangle = new Rectangle(new Point(0, 0), new Point(500, 500));
+var path = new Path.Rectangle(rectangle);
+path.fillColor = 'black';
+*/
+
+// Create a symbol, which we will use to place instances of later:
+var path = new Path.Circle(new Point(0, 0), 2);
+path.style = {
+    fillColor: 'white',
+    strokeColor: 'black'
+};
+
+
+
+var symbol = new Symbol(path);
+
+// Place the instances of the symbol:
+for (var i = 0; i < count; i++) {
+    // The center position is a random point in the view:
+    var center = Point.random() * view.size;
+    var placedSymbol = symbol.place(center);
+    //placedSymbol.scale(i / count);
+}
+
+
+function onMouseDown(event) {
+    // Create a path:
+    path.fillColor = new HsbColor(Math.random() * 360, 1, 1);
+
+}
+
+
+xtraj=[]
+//precompute vector for every dot
+for (var i = 0; i < count; i++) {
+    elevs[i]= elevs[i]*Math.PI/180.0; //convert degrees to radians
+    y = radius * Math.sin(elevs[i]) +135;
+    var item = project.activeLayer.children[i];
+    item.position.y = y; //y can be set already: doesn't change
+    /*
+    //precompute x coords
+    var xcoord = []
+    for (j=0; j< 360/angVelocity; j++){
+       azims[i] += angVelocity;
+       var x = radius * Math.cos(elevs[i]) * Math.cos(radians(azims[i])) +135;
+       xcoord.push(x);
+    }
+
+    xtraj.push(xcoord);
+    */
+}
+
+console.log(BrowserDetect.browser)
+
+
+// The onFrame function is called up to 60 times a second:
+
+framedur=[]
+function onFrame(event) {
+    stats.update();
+
+    //if (event.delta < .02){
+    console.log(event.delta)
+    // Run through the active layer's children list and change
+    // the position of the placed symbols:
+    //frame=event.count%(360/angVelocity);
+
+
+    for (var i = 0; i < count; i++) {
+        azims[i] += angVelocity;
+        var item = project.activeLayer.children[i];
+
+        /*
+        if (azims[i]%360>180){
+        item.opacity=.5;
+        }//disambiguate sphere: < is rightward; > is leftward
+        else {
+        item.opacity=1;
+        }*/
+
+        var x = radius * Math.cos(elevs[i])*Math.cos(radians(azims[i])) + 135;
+
+
+
+        item.position.x = x; //xtraj[i][frame];
+    }//}
+}
+</script>
+ <script>
+  $(document).ready(function() {
+    $("#slider").slider();
+  });
+  </script>
+  <script src="js/browserdetect.js"></script>
+    <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
+
+  </body>
+</html>

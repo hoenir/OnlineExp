@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<!-- Load the Paper.js library -->
+<script type="text/javascript" src="js/paper.js"></script>
+<!-- Load the Stats.js library -->
+<script type="text/javascript" src="js/Stats.js"></script>
+<!-- Define inlined PaperScript associate it with myCanvas -->
+<script type="text/paperscript" canvas="myCanvas">
+
+//add stats
+var stats = new Stats();
+stats.setMode(1); // 0: fps, 1: ms
+
+// Align top-left
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+
+document.body.appendChild( stats.domElement );
+
+
+
+// The amount of circles we want to make:
+var count = 200;
+
+var radius = 100;
+var angVelocity = 2;
+var azims = [];
+
+for (var i = 0; i < count; i++) {
+azims.push(Math.random()*360);
+}
+
+var elevs = [];
+
+for (var i = 0; i < count; i++) {
+elevs.push(Math.random()*180-90);
+}
+
+
+//degrees to radians
+function radians(degrees){
+    return degrees*Math.PI/180.0;
+}
+
+//spherical to cartesian coordinates
+function sph2cart(elev,azim,radius){
+
+
+    var z = radius * Math.sin(radians(elev));
+    var x = radius * Math.cos(radians(elev))*Math.cos(radians(azim));
+    //var y = radius * Math.cos(radians(elev))*Math.sin(radians(azim));
+
+
+    return [x, z]; // z
+}
+
+
+
+/*
+// create global container
+var rectangle = new Rectangle(new Point(0, 0), new Point(500, 500));
+var path = new Path.Rectangle(rectangle);
+path.fillColor = 'black';
+*/
+
+// Create a symbol, which we will use to place instances of later:
+var path = new Path.Circle(new Point(0, 0), 2);
+path.style = {
+    fillColor: 'white',
+    strokeColor: 'black'
+};
+
+
+
+var symbol = new Symbol(path);
+
+// Place the instances of the symbol:
+for (var i = 0; i < count; i++) {
+    // The center position is a random point in the view:
+    var center = Point.random() * view.size;
+    var placedSymbol = symbol.place(center);
+    //placedSymbol.scale(i / count);
+}
+
+
+// The onFrame function is called up to 60 times a second:
+function onFrame(event) {
+    stats.update();
+    
+    // Run through the active layer's children list and change
+    // the position of the placed symbols:
+    for (var i = 0; i < count; i++) {
+        azims[i] += angVelocity;
+
+        var coord = sph2cart(elevs[i],azims[i],radius);
+        var item = project.activeLayer.children[i];
+        item.position.x = coord[0]+250;
+        item.position.y = coord[1]+250;
+    }
+}
+</script>
+</head>
+<body>
+    <canvas id="myCanvas" width='500px' height='500px' style='background-color:black;'></canvas>
+    <input id="btnStart" class="btn btn-large btn-block btn-primary" onclick="onClick()" onmouseup="mouseUp()" type="button" value="Switch!" />
+    
+</body>
+</html>
