@@ -1,120 +1,173 @@
+<!DOCTYPE html>
 <html>
+
 <head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<style media="screen">
-table {
-color: #333;
-font-family: Helvetica, Arial, sans-serif;
-width: 640px;
-border-collapse:
-collapse; border-spacing: 0;
-}
-
-td, th {
-border: 1px solid transparent; /* No more visible border */
-height: 30px;
-transition: all 0.3s;  /* Simple transition for hover effect */
-}
-
-th {
-background: #DFDFDF;  /* Darken header a bit */
-font-weight: bold;
-}
-
-td {
-background: #FAFAFA;
-text-align: center;
-}
-
-/* Cells in even rows (2,4,6...) are one color */
-tr:nth-child(even) td { background: #F1F1F1; }
-
-/* Cells in odd rows (1,3,5...) are another (excludes header cells)  */
-tr:nth-child(odd) td { background: #FEFEFE; }
-
-tr td:hover { background: #666; color: #FFF; } /* Hover cell effect! */
-</style>
+    <script src="https://cdn.rawgit.com/konvajs/konva/0.11.1/konva.min.js"></script>
+    <meta charset="utf-8">
+    <title>Konva Shape Events Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #F0F0F0;
+        }
+    </style>
 </head>
+
 <body>
-<form id="form">
-  <input type="text" name="id">
-  <button type="submit">submit</button>
-</form>
+    <div id="container"></div>
+    <script>
+        var r = 100; //radius
+        var L = r * Math.sqrt(3); // length of equilateral sides
+        var cx = 200;
+        var cy = 300;
+        var h = (Math.sqrt(3) / 2) * L
+        var coord = [
+            [cx, cy - h + h / 3],
+            [cx - L / 2, cy + h / 3],
+            [cx + L / 2, cy + h / 3]
+        ]
+        var totaldist = r * 3
+        var budget = 18
 
-<table class="w3-table-all" style="width:100%">
-<tr>
-	<th>id</th>
-	<th>var1</th>
-	<th>var2</th>
-	<th>var3</th>
-</tr>
-<tr>
-	<td id="id"></td>
-	<td id="var1"></td>
-	<td id="var2"></td>
-	<td id="var3"></td>
-</tr>
-
-</table>
+        var dims = ['Kleur', 'Vorm', 'Patroon']
 
 
 
-  <script defer="defer">
-
-// jQuery snippet for changing HTML form input into JSON format to send to API
-(function ($) {
-  $.fn.serializeFormJSON = function () {
-    var o = {};
-    var a = this.serializeArray();
-    $.each(a, function () {
-      if (o[this.name]) {
-        if (!o[this.name].push) { o[this.name] = [o[this.name]]; }
-        o[this.name].push(this.value || '');
-      } else { o[this.name] = this.value || ''; }
-    });
-    return o;
-  };
-})(jQuery);
+        function dist(x1, y1, x2, y2) {
+            return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
+        }
 
 
 
-// to run when submitting the form
-$('#form').submit(function(e) {
-  // prevent default submitting form
-  e.preventDefault();
 
-  // serialize form data to JSON format
-  var data = $('#form').serializeFormJSON();
 
-  // set API url for request, with correct parameter from form
-  var url = 'https://sheetsu.com/apis/v1.0/0a118aa0' + "/" + "id" + "/" + data.id
 
-  $.ajax({
-    url: url,
-    data: data,
-    dataType: 'json',
-    type: 'GET',
 
-    // place for handling successful response
-    // showing (redirecting to) something like /thanks.html
-    //page could be a good idea
-    success: function(data) {
-      //console.log(data[0].id);
-      $('#id').text(data[0].id);
-      $('#var1').text(data[0].var1);
-      $('#var2').text(data[0].var2);
-      $('#var3').text(data[0].var3);
-    },
 
-    // handling error response
-    error: function(data) {
-      console.log(data);
-    }
-  });
+        var stage = new Konva.Stage({
+            container: 'container',
+            width: 700,
+            height: 500
+        });
 
-  return false;
-});
-</script>
+        var layer = new Konva.Layer();
+
+
+        var triangle = new Konva.RegularPolygon({
+            x: cx,
+            y: cy,
+            sides: 3,
+            radius: r,
+            //fill: 'white',
+            stroke: 'black',
+            strokeWidth: 5
+        });
+
+
+        var lines = new Konva.Group({
+            x: 0,
+            y: 0,
+        });
+
+        for (var n = 0; n < 3; n++) {
+
+            var line = new Konva.Line({
+                points: [cx, cy, coord[n][0], coord[n][1]],
+                name: dims[n],
+                stroke: 'gray',
+                strokeWidth: 2
+            });
+            lines.add(line);
+        }
+
+        var labels = new Konva.Group({
+            x: 0,
+            y: 0,
+        });
+        offsets=[[-20,-60],[-70,0],[20,0]]
+
+        for (var n = 0; n < 3; n++) {
+            var label = new Konva.Text({
+                x: coord[n][0]+offsets[n][0],
+                y: coord[n][1]+offsets[n][1],
+                fontFamily: 'Calibri',
+                fontSize: 24,
+                text: dims[n] + "\n" + String(budget/3),
+                fill: 'black'
+            });
+            labels.add(label);
+        }
+
+        var circle = new Konva.Circle({
+            x: cx,
+            y: cy,
+            radius: 7,
+            fill: 'orange',
+            stroke: 'black',
+            strokeWidth: 4
+        });
+        var beliefs = lines.getChildren()
+        var texts = labels.getChildren()
+
+
+        triangle.on('mouseout', function() {
+            circle.setX(cx);
+            circle.setY(cy);
+
+            for (i = 0; i < 3; i++) {
+                beliefs[i].setPoints([cx, cy, coord[i][0], coord[i][1]]);
+                texts[i].setText(dims[i] + "\n" + String(budget/3));
+                layer.draw();
+            }
+        });
+
+        triangle.on('mousemove', function() {
+            var mousePos = stage.getPointerPosition();
+            var x = mousePos.x;
+            var y = mousePos.y;
+
+            var dists = [0, 0, 0];
+            var tot = 0;
+            var values = [1, 1, 1]
+            beliefs = lines.getChildren()
+            for (i = 0; i < 3; i++) {
+                dists[i] = dist(x, y, coord[i][0], coord[i][1])
+                tot = tot + dists[i]
+                beliefs[i].setPoints([x, y, coord[i][0], coord[i][1]]);
+
+            }
+
+            for (i = 0; i < 3; i++) {
+                values[i] = Math.round(((1 - dists[i] / tot) - 0.5) * 2 * budget * 10) / 10
+                texts[i].setText(dims[i] + "\n" + String(dists[i]) + "\n" + String(tot));
+            }
+            layer.draw();
+            //console.log(tot, dists);
+
+            circle.setX(x)
+            circle.setY(y)
+
+
+
+        });
+
+
+
+
+        layer.add(lines);
+        layer.add(labels);
+        layer.add(circle);
+        layer.add(triangle);
+
+
+
+        // add the layer to the stage
+
+        stage.add(layer);
+    </script>
 
 </body>
+
 </html>

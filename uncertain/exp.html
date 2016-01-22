@@ -177,6 +177,10 @@
             return arr;
         }
 
+        function dist(x1, y1, x2, y2){
+            return Math.sqrt( (x2-=x1)*x2 + (y2-=y1)*y2 );
+        }
+
 
         // Find the right method, call on correct element
         function launchFullScreen(element) {
@@ -378,7 +382,15 @@
                 });
             }
 
-
+            var triangle = new Konva.RegularPolygon({
+                x: 100,
+                y: 150,
+                sides: 3,
+                radius: 70,
+                fill: 'white',
+                stroke: 'black',
+                strokeWidth: 4
+            });
 
 
 
@@ -389,6 +401,7 @@
             layer.add(group);
             layer.add(smiley);
             layer.add(rect);
+            layer.add(triangle);
             layer.add(points);
             layer.add(instructxt);
 
@@ -479,10 +492,10 @@
                 timestart = new Date().getTime();
             }
 
-            function humanReadableStimPair(stimPair){
+            function humanReadableStimPair(stimPair) {
                 var pair = [];
                 for (var i = 0; i < stimPair.length; i++) {
-                    var stimstr="";
+                    var stimstr = "";
                     for (var j = 0; j < stimPair[i].length; j++) {
                         var indx = stimPair[i][j]
                         var feature = features[j][indx];
@@ -540,8 +553,8 @@
                 points.show()
                 layer.draw()
 
-                window.location='bedankt.html'
-                // $('#dataform').submit();
+                window.location = 'bedankt.html'
+                    // $('#dataform').submit();
 
             }
 
@@ -614,8 +627,8 @@
 
                         var trial = {
                             ppn: ppn,
-                            ipaddress : ipaddress,
-                            country : country,
+                            ipaddress: ipaddress,
+                            country: country,
                             blocknb: i,
                             trialnb: j,
                             nboftrials: block.nboftrials,
