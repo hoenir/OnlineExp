@@ -36,9 +36,27 @@
 
 
         function dist(x1, y1, x2, y2) {
-            return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
+            return Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) );
         }
 
+        function onSide(xp,yp){
+
+            var c = coord
+
+            //K-V-P
+
+            for (var i = 0; i < 3; i++) {
+
+                if (i == O) {p1=c[1]}
+                //var y = ((c[i][1]-c[])/(x2-y1))*(x-xv)+ yv
+                //if (y-y1 < 0.1) {
+                    return i
+                }
+
+
+
+
+        }
 
 
 
