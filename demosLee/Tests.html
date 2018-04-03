@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!-- saved from url=(0075)https://perswww.kuleuven.be/~u0064325/GestaltDemos/Workspace/testsMain.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title>Tests</title>
+    <script type="text/javascript" async="" defer="" src="./Tests_files/piwik.js"></script><script type="text/JavaScript" src="./Tests_files/balls.js"></script>
+    <script type="text/JavaScript" src="./Tests_files/square.js"></script>
+    <script type="text/JavaScript" src="./Tests_files/randomDots.js"></script>
+    <script type="text/JavaScript" src="./Tests_files/causality.js"></script>
+    <script type="text/JavaScript" src="./Tests_files/sphere.js"></script>
+    <script type="text/JavaScript" src="./Tests_files/motv3.js"></script>
+    <script type="text/JavaScript" src="./Tests_files/mot_ellipse.js"></script>
+    <script type="text/JavaScript" src="./Tests_files/KanizsaSquare.js"></script>
+    <script type="text/javascript" src="./Tests_files/Form.js"></script>
+
+    <link rel="stylesheet" href="./Tests_files/jquery-ui-1.10.3.custom.css">
+    <link rel="shortcut icon" href="https://perswww.kuleuven.be/~u0064325/GestaltDemos/Workspace/img/favicon.ico">
+
+    <script src="./Tests_files/jquery-1.9.1.js"></script>
+    <script src="./Tests_files/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="./Tests_files/excanvas.js"></script>
+    <script>
+        $(function() {
+            $( "#slider" ).slider({
+                value: 33
+            });
+        });
+    </script>
+
+
+    <link rel="stylesheet" href="./Tests_files/main.css" type="text/css">
+</head>
+<body onload="init();">
+
+<div id="main_div" align="center" style="border: 1px solid rgb(255, 255, 255); background: rgb(255, 255, 255);">
+    <div id="menu_div" align="left" style="border: 1px solid rgb(255, 255, 255); float: left; width: 391.66px; height: 25px;">
+        <nav id="main_nav" style="width: 391.66px; height: 615.296px;">
+            <ul id="menu_list">
+                <li><a id="balls_link" href="javascript:startNewTest(false,&#39;balls&#39;);" style="background: rgb(30, 124, 154);">Balls</a></li>
+                <li><a id="square_link" href="javascript:startNewTest(false,&#39;square&#39;);" style="background: rgb(59, 59, 59);">Moving square</a></li>
+                <li><a id="randomDots_link" href="javascript:startNewTest(false,&#39;randomDots&#39;);" style="background: rgb(30, 124, 154);">Random dots</a></li>
+                <li><a id="causality_link" href="javascript:startNewTest(false,&#39;causality&#39;);" style="background: rgb(30, 124, 154);">Causality</a></li>
+                <li><a id="sphere_link" href="javascript:startNewTest(false,&#39;sphere&#39;);" style="background: rgb(30, 124, 154);">Sphere</a></li>
+                <li><a id="mot_link" href="javascript:startNewTest(false,&#39;mot&#39;);" style="background: rgb(30, 124, 154);">MOT</a></li>
+                <li><a id="mot_ellipse_link" href="javascript:startNewTest(false,&#39;mot_ellipse&#39;);" style="background: rgb(30, 124, 154);">MOT ellipse</a></li>
+                <li><a id="Kanizsa_square_link" href="javascript:startNewTest(false,&#39;Kanizsa_Square&#39;);" style="background: rgb(30, 124, 154);">Kanizsa Square</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div id="form_div" align="center" style="border: 1px solid rgb(255, 255, 255); width: 647.68px; height: 0px; vertical-align: middle;">
+        <form id="form" style="border: 1px solid rgb(255, 255, 255); width: 323.84px; display: block;" _lpchecked="1">
+            Your ID: <input id="f_id" type="text" name="form_id" title="overall type: EMAIL_ADDRESS
+    server type: EMAIL_ADDRESS
+    heuristic type: UNKNOWN_TYPE
+    label: Your ID:
+    parseable name: form_id
+    field signature: 1027660497
+    form signature: 12710214110776814208" autofill-prediction="EMAIL_ADDRESS" style="background-repeat: repeat; background-image: none; background-position: 0% 0%;"><br>
+            Your Gender:
+            <select id="f_gender" title="overall type: UNKNOWN_TYPE
+    server type: NO_SERVER_DATA
+    heuristic type: UNKNOWN_TYPE
+    label: Your Gender:
+    parseable name: f_gender
+    field signature: 499187043
+    form signature: 12710214110776814208" autofill-prediction="UNKNOWN_TYPE">
+                <option>Male</option>
+                <option>Female</option>
+            </select><br>
+            Your age: <input id="f_age" type="text" name="form_age" min="0" max="150" title="overall type: UNKNOWN_TYPE
+    server type: NO_SERVER_DATA
+    heuristic type: UNKNOWN_TYPE
+    label: Your age:
+    parseable name: form_age
+    field signature: 1101656337
+    form signature: 12710214110776814208" autofill-prediction="UNKNOWN_TYPE" style="background-repeat: repeat; background-image: none; background-position: 0% 0%;"><br>
+            <button type="button" id="submit" onclick="submit_function();">Submit!</button>
+        </form>
+    </div>
+
+    <div id="canvas_wrapper" align="center">
+        <div id="canvas_div" align="center" style="border: 1px solid rgb(255, 255, 255); display: inline; left: -196.37px;">
+            <canvas id="myCanvas" width="647" height="647" style="border:1px solid #FFFFFF;">
+                Your browser does not support the HTML5 canvas tag.
+            </canvas>
+        </div>
+
+        <div id="num_clicks" align="left" style="position: absolute; right: 0; top: 0;width: 100px; border:1px solid #FFFFFF;">
+            <p id="n_cl" style="font-size: 16.175px;"></p>
+            <p id="n_click" style="font-size: 16.175px;"></p>
+            <p id="n_cl_info" style="font-size: 16.175px;"></p>
+            <p id="pop_up_info"></p>
+        </div>
+
+        <div id="slider_wrapper" width="100" style="width: 647.68px; display: inline;">
+            <div id="slider" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all" aria-disabled="false" style="width: 647px;">
+            <a class="ui-slider-handle ui-state-default ui-corner-all" href="https://perswww.kuleuven.be/~u0064325/GestaltDemos/Workspace/testsMain.html#" style="left: 100%;"></a></div>
+        </div>
+    </div>
+    <footer style="text-align: left;">
+        <p class="footer_p">© KULeuven <span id="DEMO_SHOW"></span></p>
+    </footer>
+</div>
+
+<!-- Piwik -->
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//piwik.cc.kuleuven.be/icts/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 2]);
+    _paq.push(['setCustomVariable', 1, 'Backend', 'persftp', 'page']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript>&lt;p&gt;&lt;img src="//piwik.cc.kuleuven.be/icts//piwik.php?idsite=27" style="border:0;" alt="" /&gt;&lt;/p&gt;</noscript>
+<!-- End Piwik Code -->
+
+
+
+<div id="eid-chrome-extension-is-installed"></div><script aria-hidden="true" type="application/x-lastpass" id="hiddenlpsubmitdiv" style="display: none;"></script></body></html>

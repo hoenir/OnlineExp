@@ -1,0 +1,163 @@
+.ui-slider .ui-slider-horizontal { 
+	background: #729aaa !important;
+}
+
+.ui-slider .ui-slider-handle {
+	background: #00F53D !important;
+}
+
+.ui-slider .ui-slider-range{
+	background: #729fcf !important;
+}
+
+.ui-slider{
+	background: #003DF5 !important;
+}
+
+ul {
+    font-family: Arial, Verdana;
+    font-size: 14px;
+    margin: 0;
+    padding: 0% 50%;
+    list-style: none;
+    text-align: center;
+    width: 100%;
+}
+
+ul li {
+    display: block;
+    position: relative;
+    /*float: left;*/
+    width: 45%;
+    text-align: center;
+}
+
+li ul {
+    display: none;
+}
+
+ul li a {
+    display: block;
+    text-decoration: none;
+    color: #ffffff;
+    border-top: 1px solid #ffffff;
+    padding: 5% 5% 5% 5%;
+  /*  padding: 5px 15px 5px 15px;     */
+    background: #1e7c9a;
+    margin-left: 1px;
+    white-space: nowrap;
+}
+
+li {
+    padding: 1px 1px 1px 1px;
+}
+
+ul li a:hover {
+    background: #3b3b3b;
+}
+
+li:hover ul {
+    display: block;
+    position: absolute;
+}
+
+li:hover li {
+    float: none;
+    font-size: 11px;
+}
+
+li:hover a {
+    background: #3b3b3b;
+}
+
+li:hover li a:hover {
+    background: #1e7c9a;
+}
+
+textarea{
+    resize: none;
+}
+
+label{
+    width: 10em;
+    text-align: right;
+    margin-right: 0.5em;
+    display: block;
+}
+
+.submit input{
+    margin-left: 4.5em;
+}
+
+input{
+    width: 7em;
+    text-align: left;
+    margin-left: 0.5em;
+}
+
+#main_div{
+    padding: 0px 0px 0px 0px;
+}
+
+#form_div{
+    display: block;
+    margins: auto;
+    vertical-align: middle;
+}
+
+#form{
+    margins: auto;
+    display: block !important;
+    width: 50%;
+    display: table;
+    margin: 40% auto;
+}
+
+#myCanvas{
+    position: relative;
+}
+
+#canvas_div{
+    position: relative;
+    left:-14%;
+    border: solid 1px #000000;
+}
+
+#demo_test_list{
+    padding: 0% 0% 0% 0%;
+}
+
+#td_men1{
+    float: right;
+    width: 45%;
+    padding-right: 5%;
+}
+
+#td_men2{
+    float: right;
+    width: 45%;
+}
+
+#num_clicks{
+    text-align: center;
+    vertical-align: middle;
+}
+
+#n_cl{
+    text-align: center;
+    vertical-align: middle;
+    padding-top: 20%;
+}
+
+.footer_p {
+    display: block;
+    margin: 10px;
+}
+
+.footer_p span{
+    display: block;
+    float: right;
+    width: 50%;
+    margin-right: 10px;
+    text-align: right;
+}
