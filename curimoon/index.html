@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My experiment</title>
+  <script src="jsPsych-6.0.3/jspsych.js"></script>
+  <script src="jsPsych-6.0.3/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="jsPsych-6.0.3/plugins/jspsych-html-slider-response.js"></script>
+  <script src="jsPsych-6.0.3/plugins/jspsych-image-keyboard-response.js"></script>
+  <script src="jsPsych-6.0.3/plugins/jspsych-html-button-response.js"></script>
+  <script src="jsPsych-6.0.3/plugins/jspsych-survey-text.js"></script>
+  <script src="jsPsych-6.0.3/plugins/jspsych-fullscreen.js"></script>
+  <script src="jsPsych-6.0.3/plugins/jspsych-animate-transparency.js"></script>
+  <script src="jsPsych-6.0.3/plugins/jspsych-same-different-image.js"></script>
+  <script src="stimset.json" type="text/javascript" charset="utf-8"></script>
+  <link href="jsPsych-6.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+</head>
+
+<body>
+  <noscript>
+    <h1>Warning: Javascript seems to be disabled</h1>
+    <p>This website requires that Javascript be enabled on your browser.</p>
+    <p>Instructions for enabling Javascript in your browser can be found
+      <a href="http://support.google.com/bin/answer.py?hl=en&answer=23852">here</a>
+      <p>
+  </noscript>
+</body>
+<script>
+  // returns param value from url if name/key given
+  function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+
+  function loadJSON(filename, callback) {
+
+    var xobj = new XMLHttpRequest();
+    xobj.overrideMimeType("application/json");
+    xobj.open('GET', filename, true);
+    xobj.onreadystatechange = function () {
+      if (xobj.readyState == 4 && xobj.status == "200") {
+        // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+        callback(xobj.responseText);
+      }
+    };
+    xobj.send(null);
+  }
+
+  function saveData(name, data) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'write_data.php'); // 'write_data.php' is the path to the php file.
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    var out = JSON.stringify({
+      filename: name,
+      filedata: data
+    })
+    //console.log(out);
+    xhr.send(out);
+    
+  }
+
+  function formatDate(date) {
+    if (typeof date.getMonth === 'function') {
+      var str = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" +
+        date.getMinutes() + ":" + date.getSeconds();
+      str = str.replace(/\s+/g, '_');
+      return str;
+    } else {
+      return
+    }
+
+  }
+
+  var subject_id = getParameterByName('PROLIFIC_PID');
+  // how many stimuli per session?
+  var nb_stim_per_session = 2;
+  // prop of stimuli for phase 1
+  var prop_stim_phase1 = .6;
+  var nb_stim_phase1 = Math.round(prop_stim_phase1 * nb_stim_per_session);
+  var stimlist = [];
+  var ph1_stimlist = [];
+  var images = ["img/018tt.jpg", "img/018gs.jpg"] // the list of images to preload
+
+  loadJSON('stimset.json', function (response) {
+    createstimlists(response);
+    runExp();
+  });
+
+  function createstimlists(response) {
+
+    stimlist = JSON.parse(response);
+    // pick a random subset of images for the subject at the start of the experiment
+    //stimlist = STIMS
+    stimlist = jsPsych.randomization.sampleWithoutReplacement(stimlist, nb_stim_per_session);
+
+    // set old/new variable for determining phase 
+    for (i = 0; i < stimlist.length; i++) {
+
+      if (i < nb_stim_phase1) {
+        stimlist[i]['data'] = {
+          old: 'y'
+        };
+      } else {
+        stimlist[i]['data'] = {
+          old: 'n'
+        };
+      }
+      images.push(stimlist[i]['mooney'])
+      images.push(stimlist[i]['solution'])
+
+    }
+
+    ph1_stimlist = stimlist.slice(0, nb_stim_phase1); //subset for phase 1
+  }
+
+  for(i=0; i <images.length; i++){
+    images[i]= 'http://www.tureluurs.be/exp/curimoon/' + images[i]
+  }
+
+  function runExp() {
+
+    // record extra info in the jsPsych data
+    // this adds a property called 'subject' to every trial
+    jsPsych.data.addProperties({
+      subject: subject_id,
+    });
+
+    /* create timeline */
+    var timeline = [];
+
+    /* define welcome message trial */
+    var welcome = {
+      type: "html-keyboard-response",
+      stimulus: "Welcome to the experiment. Press any key to begin."
+    };
+    timeline.push(welcome);
+
+    var consent = {
+      type: "html-button-response",
+      choices: ["I agree"],
+      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Please consider this information carefully before deciding whether to participate in this research</h3>" +
+        "<ul style='text-align: left; font-size: .8em;'><li><b>Purpose of the research</b>: To examine how people process images.</li>" +
+        "<li><b>What you will do in this research</b>:  Stimuli (images) will be presented on the computer and you will be asked different questions about them.</li>" +
+        "<li><b>Time required</b>: Participation will take between 15 and 45 minutes to complete.</li>" +
+        "<li><b>Risks</b>:  There are no anticipated risks associated with participating in this study. The effects of participating should be comparable to those you would experience from viewing a computer monitor for 30 minutes and using a mouse or keyboard.</li>" +
+        "<li><b>Benefits</b>:  This study provides no benefits to you individually except for the monetary reward. The study provides important information about the nature of perception and learning.</li>" +
+        "<li><b>Confidentiality</b>:  Your participation in this study will remain confidential. No personally identifiable information will be associated with your data. Your de-identified data may be shared with other researchers and used in future projects.</li>" +
+        "<li><b>Participation and withdrawal</b>:  Your participation in this study is completely voluntary and you may refuse to participate or you may choose to withdraw at any time without penalty.</li>" +
+        "<li><b>How to contact the researchers</b>: If you have questions or concerns about your participation or payment, or want to request a summary of research findings, please contact Sander Van de Cruys (KU Leuven), at sander.vandecruys@kuleuven.be.</li></ul>" +
+        "<p>The nature and purpose of this research have been sufficiently explained and I agree to participate in this study.  I understand that I am free to withdraw at any time without incurring any penalty.</p>" +
+        "<p>Please consent by clicking the button below to continue. Otherwise, please exit the study at this time.</p></div>"
+    };
+    timeline.push(consent);
+
+
+    timeline.push({
+      type: 'fullscreen',
+      fullscreen_mode: true
+    });
+
+    /* define instructions trial */
+    var instructions1 = {
+      type: "html-keyboard-response",
+      stimulus: "<h3>Instructions</h3><p>This experiment consist of two tasks. In the first task, you will see a series of distorted images like the one below on the left</p>" +
+        "<p>As you can see in the righthand image, the distorted images are derived from actual photographs.</p>" +
+        "<p>In what follows, you will only <strong>briefly</strong> be presented with only the <strong>distorted image</strong>.</p> " +
+        "<div style='width: 800px;'>" +
+        "<div style='float: left;'><img src='img/018tt.jpg' height='300' width='300'></img>" +
+        "<div style='float: right;'><img src='img/018gs.jpg' height='300' width='300'></img>" +
+        "</div>" +
+        "<p>Subsequently you will be asked several questions about the image. Specifically, we ask you...</p>" +
+        "<p>Press any key to continue with the instructions.</p>",
+      post_trial_gap: 0
+    };
+    timeline.push(instructions1);
+
+    /* define instructions trial */
+    var instructions2 = {
+      type: "html-keyboard-response",
+      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Instructions</h3>" +
+        "<ul style='text-align: left'><li>Whether you have recognized what was in the image. This is a difficult question," +
+        " especially when you have seen the image only briefly. It is normal that you will not recognize many, probably most, of the images.</li>" +
+        "<li>Next, we ask you whether you think you will be able to solve the image given sufficient time. You indicate how confident you are about that.</li>" +
+        "<li>Next, we ask you how curious you are about the solution.</li>" +
+        "<li>Next, you'll see the image again for a bit longer, and you get the chance to actually describe what was in the image if you recognized it by now." +
+        " If you still don't know, don't worry. It is meant to be very difficult. You'll soon get to see the solution, but try to make a guess if you can.</li>" +
+        "<li>Next, you'll see the actual solution and you'll be asked to indicate how strong your <strong>aha-experience</strong> was.</li>" +
+        "This describes the positive 'click' you sometimes experience, when the pieces of the 'puzzle' fall together and you 'understand' the image.</li>" +
+        "<li>Finally, we will ask you how satisfied you are with the solution</li></ul>Don't worry if this list seems overwhelming, you will be guided through the whole process with reminders.</p>" +
+        "<p>Press any key to begin the experiment.</p></div>",
+      post_trial_gap: 1000
+    };
+    timeline.push(instructions2);
+
+    /* phase 1 */
+
+    var fixation = {
+      type: 'html-keyboard-response',
+      stimulus: '<div style="font-size:60px;">+</div>',
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 500,
+      data: {
+        test_part: 'fixation'
+      }
+    }
+
+    var mooney1 = {
+      type: 'image-keyboard-response',
+      stimulus: jsPsych.timelineVariable('mooney'),
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 700
+    };
+
+
+
+    var question_recognized = {
+      type: 'html-slider-response',
+      stimulus: '<p>How confident are you that you already know now what is in the picture?</p>',
+      labels: ['I have no clue at all', 'I know with very high certainty'],
+      prompt: "",
+      min: 0,
+      max: 10,
+      start: 5
+    };
+
+
+
+    var question_solvable = {
+      type: 'html-slider-response',
+      stimulus: '<p>How confident are you that you could solve this image <strong>when given unlimited time?</strong></p>',
+      labels: ['Very unlikely', 'Very likely'],
+      prompt: "",
+      min: 0,
+      max: 10,
+      start: 5
+    };
+
+    var question_curious = {
+      type: 'html-slider-response',
+      stimulus: '<p>How <strong>curious</strong> are you about the solution of this image?</p>',
+      labels: ['Indifferent', 'Very curious'],
+      prompt: "",
+      min: 0,
+      max: 10,
+      start: 5
+    };
+
+    var mooney2 = {
+      type: 'image-keyboard-response',
+      stimulus: jsPsych.timelineVariable('mooney'),
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 2000
+    };
+
+    var solved = {
+      type: 'survey-text',
+      data: jsPsych.timelineVariable('correct_resp'),
+      questions: [{
+        prompt: "Did you see what was actually depicted in the image? If so, or if you can make a good guess, use one or two words to describe it. If not, just leave blank and click continue",
+        rows: 1,
+        columns: 40
+      }],
+    };
+
+    var solution = {
+      type: 'animate-transparency',
+      stimuli: function () {
+        return [jsPsych.timelineVariable('mooney')(), jsPsych.timelineVariable('solution')()];
+      },
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 2500,
+    };
+
+    var question_aha = {
+      type: 'html-slider-response',
+      stimulus: '<p>How strong was your <strong>aha-experience</strong> when seeing the solution?</p>',
+      labels: ['Practically absent', 'Very intense'],
+      prompt: "",
+      min: 0,
+      max: 10,
+      start: 5
+    };
+
+    var question_satisfied = {
+      type: 'html-slider-response',
+      stimulus: '<p>How <strong>(dis)satisfied</strong> were you with the solution?</p>',
+      labels: ['Very dissatisfied', 'Very satisfied'],
+      prompt: "",
+      min: 0,
+      max: 10,
+      start: 5
+    };
+
+
+    var phase1_procedure = {
+      timeline: [fixation, mooney1, question_recognized, question_solvable, question_curious, mooney2, solved,
+        solution,
+        question_aha, question_satisfied
+      ],
+      timeline_variables: ph1_stimlist,
+      repetitions: 1,
+      randomize_order: true
+    };
+
+    timeline.push(phase1_procedure);
+
+    /* phase 2 below */
+
+    var ph2_instruct = {
+      type: "html-keyboard-response",
+      stimulus: "<p>You completed the first phase of the experiment.</p>" +
+        "<p>In the next phase you will again see a series of distorted images, some of which you have already encountered in the previous phase.</p>" +
+        "<p>You will be asked recognize what is depicted if you can and subsequently indicate whether the image was an old or a new one (one not seen in the previous phase.</p>" +
+        "<p>Press any key to start the new phase</p>",
+    };
+    timeline.push(ph2_instruct);
+
+
+
+    var ph2_fixation = {
+      type: 'html-keyboard-response',
+      stimulus: '<div style="font-size:60px;">+</div>',
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 500,
+      data: {
+        test_part: 'fixation'
+      }
+    }
+
+
+    var ph2_mooney = {
+      type: 'image-keyboard-response',
+      stimulus: jsPsych.timelineVariable('mooney'),
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 2000
+    };
+
+
+    var ph2_solved = {
+      type: 'survey-text',
+      questions: [{
+        prompt: "Did you see what was actually depicted in the image? If so, use one or two words to describe it. If not, just leave blank and click continue",
+        rows: 1,
+        columns: 40
+      }],
+    };
+
+
+    var ph2_oldornew = {
+      type: 'html-keyboard-response',
+      stimulus: '<p></p>',
+      choices: ['y', 'n'],
+      prompt: "<p>Did you see the image before, yes or no? <b>Press y or n</b>.</p>",
+      data: jsPsych.timelineVariable('data'),
+      on_finish: function (data) {
+        data.correct = data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.old);
+      }
+    };
+
+    var phase2_procedure = {
+      timeline: [ph2_fixation, ph2_mooney, ph2_solved, ph2_oldornew],
+      timeline_variables: stimlist,
+      repetitions: 1,
+      randomize_order: true
+    }
+    timeline.push(phase2_procedure);
+
+    /* define debrief */
+
+    var debrief = {
+      type: "html-keyboard-response",
+      stimulus: "<h1>Thank you!</h1><p>You finished the complete experiment.</p>" +
+        "<p>Press any key to return to...</p>",
+    };
+    timeline.push(debrief);
+
+    /* start the experiment */
+    jsPsych.init({
+      timeline: timeline,
+      show_progress_bar: true,
+      preload_images: images,
+      on_finish: function () {
+        jsPsych.data.addProperties({
+          totalTime: jsPsych.totalTime()
+        });
+        saveData("curimoon.csv", jsPsych.data.get().csv());
+      }
+    });
+  }
+</script>
+
+</html>

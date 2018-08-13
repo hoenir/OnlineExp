@@ -8,11 +8,12 @@
  * do proper ghost mechanics (blinky/wimpy etc)
  *
  * TODO:
- * apply threat levels high,low,no (remove ghost at certain time)
- * test timers
- * remove pills
+ * remove pills?
+ * post full df-json to server, list of dicts
+ * post individual trials, dicts
+ * reduce mapsize/layout?
+ * elaborate endGame()
  * add right walker (walker 9)
- * post responses
  * add instructions and examples
  * test game flow/length
  */
@@ -28,10 +29,61 @@ var NONE = 4,
     COUNTDOWN = 8,
     EATEN_PAUSE = 9,
     DYING = 10,
-    EXP = 11
+    EXP = 11,
     Pacman = {};
 
 Pacman.FPS = 30;
+Pacman.ghosts = []
+
+//vars for experiment
+var HIGH = 0.7,
+    LOW = 0.4,
+    partId = 0, // this should be actual partId, taken from url?
+    iti = 20000, // minimum time in ms between two trials
+    waitDifficulty = 15000; // time in between changes in difficulty
+
+var newurl = "www.google.be"; // site to move to when experiment finished
+
+/***********************
+ *	Prepare triallist
+ ***********************/
+var df = []; // dataframe to be filled
+var fig = ['plw', 'sphere'];
+var threatLevel = ['N', 'L', 'H']; // no, low, high
+var nbofrepeats = 2;
+var idx = 0;
+
+for (var i = 0; i < fig.length; i++) {
+    for (var j = 0; j < threatLevel.length; j++) {
+        for (var k = 0; k < nbofrepeats; k++) {
+            df.push({
+                partId: partId,
+                gameStart: null,
+                trialnb: null,
+                fig: fig[i],
+                threatLevel: threatLevel[j],
+                trialStart: null,
+                rt: null,
+                resp: null
+            });
+            idx++;
+        }
+    }
+}
+
+/**
+ * Shuffles array in place.
+ * @param {Array} a items An array containing the items.
+ */
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+}
 
 
 
@@ -58,117 +110,121 @@ function ColouredRectangle(x, y, width, height, colour) {
 }
 
 
-//vars for experiment
-var HIGH = 0.7,
-    LOW = 0.4,
-    currentThreat = 0.0,
-    ftv = 0,
-    currenttrial = 0,
-    datastring = "",
-    gameStart,
-    trialStart, //holds time of the start of the current/last trial (originally start of game)
-    partId = 0, // this should be actual partId, taken from url?
-    iti = 10000, // minimum time in ms between two trials
-    waitDifficulty= 10000; // time in between changes in difficulty
-
 
 /***********************
-*	Prepare triallist
-***********************/
-var df = []; // dataframe to be filled
-var fig = ['plw', 'sphere'];
-var threatLevel = ['N', 'L', 'H']; // no, low, high
-var nbofrepeats = 10;
+ *	Trial structure
+ ***********************/
 
-for( var i = 0 ; i < fig.length ; i++ ){
-    for( var j = 0 ; j < threatLevel.length ; j++ ){
-        for( var k = 0 ; k < nbofrepeats ; k++ ){
-        df.push({partId: partId, fig: fig[i], threatLevel: threatLevel[j], trialStart: null, rt: null, resp: null, trialnb: 0})
-        }
-    }
-}
+Pacman.Trial = function () {
 
-/**
- * Shuffles array in place.
- * @param {Array} a items An array containing the items.
- */
-function shuffle(a) {
-    var j, x, i;
-    for (i = a.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1));
-        x = a[i];
-        a[i] = a[j];
-        a[j] = x;
-    }
-}
-
-
-/***********************
-*	Trial structure
-***********************/ 
-
-Pacman.Trial = function(){
-
+    //init trial vars
     var ctx2,
         keyMap = {},
-        resp,
+        resp = null,
         rt,
         background,
-        plw,
-        sphere,
         thisTrial,
         trialIdx = 0,
-        difficultyStart = trialStart;
-    
-    keyMap[KEY.ALT] = RIGHT;
-    keyMap[KEY.CTRL] = LEFT;
-    keyMap[KEY.SHIFT] = UP;
+        trialStart = null,
+        trialEnd = null,
+        difficultyStart = new Date().getTime(),
+        gameStart = null,
+        currentThreat = 0.0;
+    trialActive = false;
 
-    function init(){
-        setCanvasAndContext()
-         
-        plw = new Pacman.Plw()
-        sphere = new Pacman.Sphere()
+
+    // init sphere vars
+    var sphere_G_SphereRotationCounter = 0;
+    var sphere_G_SphereDotArray = new Array(3);
+    var sphere_input_ratio = 0.5;
+    var SPHERE_NUM_SPHEREDOTS = 1000;
+
+    // init plw vars
+    var dotsperframe = 15,
+        dotsize = 5,
+        nrframes = 0,
+        framecounter = 0,
+        x = 0,
+        y = 0;
+
+
+    function init() {
+        setCanvasAndContext();
+        initialiseArray(); // initialize sphere array
+        nrframes = COORDS.length / 15 // set plw frames
+        gameStart = new Date().getTime(); // add time of game start
+        trialEnd = new Date().getTime();
         shuffle(df);
+        thisTrial = df[trialIdx]; // load first trial
     }
 
-    function determineTrial(){
+    function determineTrial() {
 
-        // check time since last trial
-        var tsincelast = (new Date().getTime()) - trialStart;
-        var threatLevel = null;
+        if (trialActive) {
+            return false;
+        } else {
+            // check time since last trial
+            var tsincelast = (new Date().getTime()) - trialEnd;
 
-        currentThreat = Pacman.getThreat();
-        
-        //Get current trial df[trialnb]
+            var threatLevel = null;
 
-        if (thisTrial.threatLevel === 'N'){ 
-            threatLevel = 'N'
-            for (i = 0; i < Pacman.ghosts.length; i += 1) {
-                Pacman.ghosts[i].//PACMAN make ghosts eatable
-            }
-        } else if (currentThreat >= HIGH){threatLevel = 'H'} 
-        else if (currentThreat <= LOW){threatLevel = 'L'} 
+            currentThreat = PACMAN.getThreat();
 
-        if (threatLevel === thisTrial.threatLevel && tsincelast > iti){
-    
-            PACMAN.setState(EXP) // enter the next trial
-            
-        } else if (thisTrial.threatLevel === 'H' || thisTrial.threatLevel === 'L' ) {
-            // change difficulty (speed or number of ghosts) if you haven't just changed it
-            if ((new Date().getTime()) - difficultyStart > waitDifficulty){
+            //Get current trial df[trialnb]
+
+            if (thisTrial.threatLevel === 'N') {
+                threatLevel = 'N';
                 for (i = 0; i < Pacman.ghosts.length; i += 1) {
-                    Pacman.ghosts[i].setSpeed(thisTrial.threatLevel); // set speed/difficulty according to threat level
+                    if (!Pacman.ghosts[i].eatable) {
+                        Pacman.ghosts[i].makeEatable(); //PACMAN make ghosts eatable, make hidden instead?
+                    }
                 }
-                difficultyStart = new Date().getTime()
-            } 
+            } else if (currentThreat >= HIGH) {
+                threatLevel = 'H';
+            } else if (currentThreat <= LOW) {
+                threatLevel = 'L';
+            }
 
-        } 
+            if (threatLevel === thisTrial.threatLevel && tsincelast > iti) {
+                console.log(tsincelast);
+                startTrial();
+                return true; // gives signal to pause game and enter trial mode
+
+            } else if (thisTrial.threatLevel === 'H' || thisTrial.threatLevel === 'L') {
+                // change difficulty (speed or number of ghosts) if you haven't just changed it
+                if ((new Date().getTime()) - difficultyStart > waitDifficulty) {
+                    for (i = 0; i < Pacman.ghosts.length; i += 1) {
+                        Pacman.ghosts[i].setSpeed(thisTrial.threatLevel); // set speed/difficulty according to threat level
+                    }
+                    difficultyStart = new Date().getTime();
+                }
+
+
+            }
+            return false; // gives signal that currentthreat is not right or that iti is still too short
+        }
     }
 
-    function startTrial(){
+    function startTrial() {
+        // set correct response keys for trial/fig
+        if (thisTrial.fig == 'plw') {
+            keyMap = {};
+            keyMap[KEY.R] = UP;
+            keyMap[KEY.F] = DOWN;
+        } else if (thisTrial.fig == 'sphere') {
+            keyMap = {};
+            keyMap[KEY.D] = LEFT;
+            keyMap[KEY.G] = RIGHT;
+        }
+
+        trialActive = true;
         background = new ColouredRectangle(0, 0, ctx2.canvas.width, ctx2.canvas.height, "black");
         trialStart = new Date().getTime();
+        thisTrial.trialnb = trialIdx;
+        thisTrial.trialStart = trialStart;
+        thisTrial.currentThreat = currentThreat;
+        thisTrial.gameStart = gameStart;
+        console.log(thisTrial);
     }
 
     function setCanvasAndContext() {
@@ -177,6 +233,7 @@ Pacman.Trial = function(){
         ctx2.canvas.height = window.innerHeight * 0.88;
         ctx2.canvas.width = window.innerHeight * 0.88;
         ctx2.clearRect(0, 0, target.width, target.height);
+
     }
 
     function drawCircle(c, colour) {
@@ -194,164 +251,38 @@ Pacman.Trial = function(){
     }
 
     function present() {
-    
-        if (thisTrial.fig=='plw') {plw.draw()}
-        if (thisTrial.fig=='sphere') {sphere.draw()}
-    
-    }
-
-    function endTrial() {
         ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
-        resp = null;
-    };
-
-    function keyDown(e) {
-        if (typeof keyMap[e.keyCode] !== "undefined") {
-    
-            resp = keyMap[e.keyCode];
-            rt = (new Date().getTime()) - trialStart;
-            recordResponse(resp, rt);
-            endTrial();
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }
-        return true;
-    };
-
-    function recordResponse(resp, rt) {
-
-        if (resp === UP) {
-            ftv = 0;
-        } else {
-            ftv = 1;
-        }
-
-        trialvals = [partId, currenttrial, trialStart, "TEST", threat, threatcat, resp, ftv, rt];
-        datastring = datastring.concat(trialvals, "\n");
-        trialIdx++; //set next trial
-        thisTrial = df[trialIdx];
-        
-        
-        console.log(datastring);
-        // post data
-    }
-    
-    function hasResponded() {
-    
-        return resp !== null;
-    
-    }
-    
-    init();
-    
-    return {
-        "present": present,
-        "endTrial": endTrial,
-        "keyDown": keyDown,
-        "hasResponded": hasResponded,
-    }
-
-}
-
-Pacman.Sphere = function(){
-    
-    var sphere_done = false;
-    var sphere_G_SphereRotationCounter = 0;
-    var sphere_G_SphereDotArray = new Array(3);
-    var sphere_input_ratio = 0.5;
-    var SPHERE_NUM_SPHEREDOTS = 1000;
-
-    /***********************
-     *	INIT FUNCTION
-    ***********************/
-    function init(){
-        /*window.addEventListener("keydown",sphere_doKeyDown,false);
-        window.addEventListener("mousedown", sphere_doMouseMove, false);
-        window.addEventListener("mouseup", sphere_doMouseMove, false);
-        window.addEventListener("mousemove", sphere_doMouseMove, false); */
-
-        initialiseArray();   
-    }
-
-    function draw() {
-        ctx2.clearRect(0, 0, canvas.width, canvas.height);
         drawRectangle(background.rect, "black");
-        drawSphere(sphere_input_ratio);
-        sphere_G_SphereRotationCounter++
-        if(sphere_G_SphereRotationCounter >= 360) sphere_G_SphereRotationCounter = 0;
-    }
+        if (thisTrial.fig == 'sphere') {
+            drawSphere(sphere_input_ratio);
+            sphere_G_SphereRotationCounter++;
+            if (sphere_G_SphereRotationCounter >= 360) sphere_G_SphereRotationCounter = 0;
+        }
+        if (thisTrial.fig == 'plw') {
+            drawPlw();
+        }
 
+    }
 
     //CopyPaste of the C# function made by Mr. Lee de-Wit
-    function drawSphere(RatioUsed){
+    function drawSphere(RatioUsed) {
         var AVG_BALL_SIZE = 3;
         var myLocalColor = 0;
         var CosChange;
         var InCosChange;
 
-        for ( var iDot = 0 ; iDot < SPHERE_NUM_SPHEREDOTS ; iDot++ ) {
-            CosChange = RatioUsed*(Math.cos((2 * Math.PI) / 360 * sphere_G_SphereDotArray[2][iDot][sphere_G_SphereRotationCounter]));
-            InCosChange = (1-RatioUsed) * (Math.cos((2*Math.PI) / 360 * (sphere_G_SphereDotArray[2][iDot][sphere_G_SphereRotationCounter])));
-            myLocalColor = Math.round(140 - (30*CosChange) + (30*InCosChange))
+        for (var iDot = 0; iDot < SPHERE_NUM_SPHEREDOTS; iDot++) {
+            CosChange = RatioUsed * (Math.cos((2 * Math.PI) / 360 * sphere_G_SphereDotArray[2][iDot][sphere_G_SphereRotationCounter]));
+            InCosChange = (1 - RatioUsed) * (Math.cos((2 * Math.PI) / 360 * (sphere_G_SphereDotArray[2][iDot][sphere_G_SphereRotationCounter])));
+            myLocalColor = Math.round(140 - (30 * CosChange) + (30 * InCosChange));
 
-            var BallsSize = AVG_BALL_SIZE + (2*CosChange) - (2*InCosChange);
+            var BallsSize = AVG_BALL_SIZE + (2 * CosChange) - (2 * InCosChange);
 
-            drawCircle(new Circle(sphere_G_SphereDotArray[0][iDot][sphere_G_SphereRotationCounter],sphere_G_SphereDotArray[1][iDot][sphere_G_SphereRotationCounter],BallsSize),"rgb("+myLocalColor+","+myLocalColor+","+myLocalColor+")");
+            drawCircle(new Circle(sphere_G_SphereDotArray[0][iDot][sphere_G_SphereRotationCounter], sphere_G_SphereDotArray[1][iDot][sphere_G_SphereRotationCounter], BallsSize), "rgb(" + myLocalColor + "," + myLocalColor + "," + myLocalColor + ")");
         }
     }
 
-
-    function initialiseArray(){
-        var mySW = Pacman.trial.ctx2.canvas.width/2;
-        var mySH = Pacman.trial.ctx2.canvas.height/2;
-        var Ylength;
-        var Radius = mySW*.8;
-        var RandDotPhase = new Array(SPHERE_NUM_SPHEREDOTS);
-
-        for( var i = 0 ; i < sphere_G_SphereDotArray.length ; i++ ) {
-            sphere_G_SphereDotArray[i] = new Array(SPHERE_NUM_SPHEREDOTS);
-            for( var j = 0 ; j < sphere_G_SphereDotArray[i].length ; j++ ){
-                sphere_G_SphereDotArray[i][j] = new Array(360);
-            }
-        }
-
-        for( var i = 0 ; i  < SPHERE_NUM_SPHEREDOTS ; i++ ){
-            RandDotPhase[i] = Math.random()*360;
-        }
-
-        for( var iDegree = 0 ; iDegree < 360 ; iDegree++ ) {
-            for ( var iDot = 0 ; iDot < SPHERE_NUM_SPHEREDOTS ; iDot++ ) {
-                Ylength = Math.cos((2*Math.PI)/360 * ((iDot/SPHERE_NUM_SPHEREDOTS)*360)) * Radius;
-                sphere_G_SphereDotArray[0][iDot][iDegree] = Math.sin((2*Math.PI)/360 * ((iDegree + RandDotPhase[iDot]) % 360)) * (Math.sqrt((Radius * Radius) - (Ylength * Ylength))) + mySW;
-                sphere_G_SphereDotArray[1][iDot][iDegree] = Ylength + mySH;
-                sphere_G_SphereDotArray[2][iDot][iDegree] = (iDegree + RandDotPhase[iDot])%360;
-            }
-        }
-    }
-    init();
-}
-
-
-
-Pacman.Plw = function() {
-
-    var dotsperframe = 15,
-        dotsize = 5,
-        nrframes = 0,
-        framecounter = 0,
-        x = 0,
-        y = 0;
-
-    function init() {   
-        nrframes = COORDS.length / 15;
-    };
-
-
-    function draw() {
-        ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
-        drawRectangle(background.rect, "black");
-    
+    function drawPlw() {
         //get coords for current frame
         thisCoords = COORDS.slice(framecounter * dotsperframe, (framecounter + 1) * dotsperframe);
 
@@ -360,23 +291,113 @@ Pacman.Plw = function() {
 
             x = (thisCoords[i][0] * 50) + 250;
             y = (-thisCoords[i][1] * 50) + 250;
-            drawCircle(new Circle(x,y,dotsize), "white");
+            drawCircle(new Circle(x, y, dotsize), "white");
 
-        };
+        }
         //set next frame
         framecounter++;
         if (framecounter >= nrframes) framecounter = 0;
-    };
+    }
+
+
+    function initialiseArray() {
+        var mySW = ctx2.canvas.width / 2;
+        var mySH = ctx2.canvas.height / 2;
+        var Ylength;
+        var Radius = mySW * 0.8;
+        var RandDotPhase = new Array(SPHERE_NUM_SPHEREDOTS);
+
+        for (var i = 0; i < sphere_G_SphereDotArray.length; i++) {
+            sphere_G_SphereDotArray[i] = new Array(SPHERE_NUM_SPHEREDOTS);
+            for (var j = 0; j < sphere_G_SphereDotArray[i].length; j++) {
+                sphere_G_SphereDotArray[i][j] = new Array(360);
+            }
+        }
+
+        for (var i = 0; i < SPHERE_NUM_SPHEREDOTS; i++) {
+            RandDotPhase[i] = Math.random() * 360;
+        }
+
+        for (var iDegree = 0; iDegree < 360; iDegree++) {
+            for (var iDot = 0; iDot < SPHERE_NUM_SPHEREDOTS; iDot++) {
+                Ylength = Math.cos((2 * Math.PI) / 360 * ((iDot / SPHERE_NUM_SPHEREDOTS) * 360)) * Radius;
+                sphere_G_SphereDotArray[0][iDot][iDegree] = Math.sin((2 * Math.PI) / 360 * ((iDegree + RandDotPhase[iDot]) % 360)) * (Math.sqrt((Radius * Radius) - (Ylength * Ylength))) + mySW;
+                sphere_G_SphereDotArray[1][iDot][iDegree] = Ylength + mySH;
+                sphere_G_SphereDotArray[2][iDot][iDegree] = (iDegree + RandDotPhase[iDot]) % 360;
+            }
+        }
+    }
+
+    function endTrial() {
+        ctx2.clearRect(0, 0, ctx2.canvas.width, ctx2.canvas.height);
+        trialIdx++; //set next trial
+        resp = null;
+        trialEnd = new Date().getTime();
+        trialActive = false
+
+        if (trialIdx < df.length) {
+            thisTrial = df[trialIdx];
+        } else {
+            //post full df
+            Pacman.endGame();
+        }
+
+        for (i = 0; i < Pacman.ghosts.length; i += 1) {
+            Pacman.ghosts[i].resetSpeed(); // reset speed at end of trial
+        }
+
+    }
+
+    function keyDown(e) {
+
+
+        if (typeof keyMap[e.keyCode] !== "undefined") {
+
+            resp = keyMap[e.keyCode];
+            rt = (new Date().getTime()) - trialStart;
+            recordResponse(resp, rt);
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        return true;
+    }
+
+    function recordResponse(resp, rt) {
+
+        thisTrial.trialnb = trialIdx + 1;
+        thisTrial.resp = resp;
+        thisTrial.rt = rt;
+        console.log(thisTrial);
+        // post trialdata
+    }
+
+    function hasResponded() {
+
+        return resp !== null;
+
+    }
 
     init();
 
+    return {
+        "determineTrial": determineTrial,
+        "startTrial": startTrial,
+        "present": present,
+        "endTrial": endTrial,
+        "keyDown": keyDown,
+        "hasResponded": hasResponded,
+        "drawCircle": drawCircle,
+        "drawRectangle": drawRectangle,
+    };
 
 };
 
 
 
 
-Pacman.Ghost = function(game, map, colour) {
+
+Pacman.Ghost = function (game, map, colour) {
 
     var position = null,
         direction = null,
@@ -395,20 +416,19 @@ Pacman.Ghost = function(game, map, colour) {
         return {
             "x": addBounded(current.x, xSpeed),
             "y": addBounded(current.y, ySpeed)
-        };
-    };
-
-    function setSpeed(threatLevel){
-
-        if(threatLevel=="H"){
-            currentSpeed = normalSpeed + 1;
         }
-        else if(threatLevel=="L"){
+    }
+
+    function setSpeed(threatLevel) {
+
+        if (threatLevel == "H") {
+            currentSpeed = normalSpeed + 1;
+        } else if (threatLevel == "L") {
             currentSpeed = normalSpeed - 1;
         }
     }
 
-    function resetSpeed(){
+    function resetSpeed() {
         currentSpeed = normalSpeed;
     }
 
@@ -425,24 +445,24 @@ Pacman.Ghost = function(game, map, colour) {
             return x1 - rem;
         }
         return x1 + x2;
-    };
+    }
 
     function isVunerable() {
         return eatable !== null;
-    };
+    }
 
     function isDangerous() {
         return eaten === null;
-    };
+    }
 
     function isHidden() {
         return eatable === null && eaten !== null;
-    };
+    }
 
     function getRandomDirection() {
         var moves = (direction === LEFT || direction === RIGHT) ? [UP, DOWN] : [LEFT, RIGHT];
         return moves[Math.floor(Math.random() * 2)];
-    };
+    }
 
     function reset() {
         eaten = null;
@@ -450,34 +470,34 @@ Pacman.Ghost = function(game, map, colour) {
         position = {
             "x": 90,
             "y": 80
-        };
+        }
         direction = getRandomDirection();
         due = getRandomDirection();
-    };
+    }
 
     function onWholeSquare(x) {
         return x % 10 === 0;
-    };
+    }
 
     function oppositeDirection(dir) {
         return dir === LEFT && RIGHT ||
             dir === RIGHT && LEFT ||
             dir === UP && DOWN || UP;
-    };
+    }
 
     function makeEatable() {
         direction = oppositeDirection(direction);
         eatable = game.getTick();
-    };
+    }
 
     function eat() {
         eatable = null;
         eaten = game.getTick();
-    };
+    }
 
     function pointToCoord(x) {
         return Math.round(x / 10);
-    };
+    }
 
     function nextSquare(x, dir) {
         var rem = x % 10;
@@ -488,15 +508,15 @@ Pacman.Ghost = function(game, map, colour) {
         } else {
             return x - rem;
         }
-    };
+    }
 
     function onGridSquare(pos) {
         return onWholeSquare(pos.y) && onWholeSquare(pos.x);
-    };
+    }
 
     function secondsAgo(tick) {
         return (game.getTick() - tick) / Pacman.FPS;
-    };
+    }
 
     function getColour() {
         if (eatable) {
@@ -509,7 +529,7 @@ Pacman.Ghost = function(game, map, colour) {
             return "#222";
         }
         return colour;
-    };
+    }
 
     function draw(ctx) {
 
@@ -558,7 +578,7 @@ Pacman.Ghost = function(game, map, colour) {
         ctx.fill();
 
         var f = s / 12;
-        var off = {};
+        var off = {}
         off[RIGHT] = [f, 0];
         off[LEFT] = [-f, 0];
         off[UP] = [0, -f];
@@ -573,7 +593,7 @@ Pacman.Ghost = function(game, map, colour) {
         ctx.closePath();
         ctx.fill();
 
-    };
+    }
 
     function pane(pos) {
 
@@ -581,23 +601,23 @@ Pacman.Ghost = function(game, map, colour) {
             return {
                 "y": 100,
                 "x": -10
-            };
+            }
         }
 
         if (pos.y === 100 && pos.x <= -10 && direction === LEFT) {
             return position = {
                 "y": 100,
                 "x": 190
-            };
+            }
         }
 
         return false;
-    };
+    }
 
     function getPos() {
         return position;
 
-    };
+    }
 
 
     function move(ctx) {
@@ -647,8 +667,8 @@ Pacman.Ghost = function(game, map, colour) {
         return {
             "new": position,
             "old": oldPos
-        };
-    };
+        }
+    }
 
     return {
         "eat": eat,
@@ -658,11 +678,13 @@ Pacman.Ghost = function(game, map, colour) {
         "reset": reset,
         "move": move,
         "draw": draw,
-        "getPos": getPos
-    };
-};
+        "getPos": getPos,
+        "setSpeed": setSpeed,
+        "resetSpeed": resetSpeed,
+    }
+}
 
-Pacman.User = function(game, map) {
+Pacman.User = function (game, map) {
 
     var position = null,
         direction = null,
@@ -670,7 +692,7 @@ Pacman.User = function(game, map) {
         due = null,
         lives = null,
         score = 5,
-        keyMap = {};
+        keyMap = {}
 
     keyMap[KEY.ARROW_LEFT] = LEFT;
     keyMap[KEY.ARROW_UP] = UP;
@@ -682,21 +704,21 @@ Pacman.User = function(game, map) {
         if (score >= 10000 && score - nScore < 10000) {
             lives += 1;
         }
-    };
+    }
 
     function theScore() {
         return score;
-    };
+    }
 
 
 
     function loseLife() {
         lives -= 1;
-    };
+    }
 
     function getLives() {
         return lives;
-    };
+    }
 
     function initUser() {
         score = 0;
@@ -707,21 +729,21 @@ Pacman.User = function(game, map) {
     function newLevel() {
         resetPosition();
         eaten = 0;
-    };
+    }
 
     function resetPosition() {
         position = {
             "x": 90,
             "y": 120
-        };
+        }
         direction = LEFT;
         due = LEFT;
-    };
+    }
 
     function reset() {
         initUser();
         resetPosition();
-    };
+    }
 
     function keyDown(e) {
         if (typeof keyMap[e.keyCode] !== "undefined") {
@@ -731,22 +753,22 @@ Pacman.User = function(game, map) {
             return false;
         }
         return true;
-    };
+    }
 
     function getNewCoord(dir, current) {
         return {
             "x": current.x + (dir === LEFT && -2 || dir === RIGHT && 2 || 0),
             "y": current.y + (dir === DOWN && 2 || dir === UP && -2 || 0)
-        };
-    };
+        }
+    }
 
     function onWholeSquare(x) {
         return x % 10 === 0;
-    };
+    }
 
     function pointToCoord(x) {
         return Math.round(x / 10);
-    };
+    }
 
     function nextSquare(x, dir) {
         var rem = x % 10;
@@ -757,25 +779,25 @@ Pacman.User = function(game, map) {
         } else {
             return x - rem;
         }
-    };
+    }
 
     function next(pos, dir) {
         return {
             "y": pointToCoord(nextSquare(pos.y, dir)),
             "x": pointToCoord(nextSquare(pos.x, dir)),
-        };
-    };
+        }
+    }
 
     function onGridSquare(pos) {
         return onWholeSquare(pos.y) && onWholeSquare(pos.x);
-    };
+    }
 
     function isOnSamePlane(due, dir) {
         return ((due === LEFT || due === RIGHT) &&
-            (dir === LEFT || dir === RIGHT)) ||
+                (dir === LEFT || dir === RIGHT)) ||
             ((due === UP || due === DOWN) &&
-            (dir === UP || dir === DOWN));
-    };
+                (dir === UP || dir === DOWN));
+    }
 
     function move(ctx) {
 
@@ -808,21 +830,21 @@ Pacman.User = function(game, map) {
             return {
                 "new": position,
                 "old": position
-            };
+            }
         }
 
         if (npos.y === 100 && npos.x >= 190 && direction === RIGHT) {
             npos = {
                 "y": 100,
                 "x": -10
-            };
+            }
         }
 
         if (npos.y === 100 && npos.x <= -12 && direction === LEFT) {
             npos = {
                 "y": 100,
                 "x": 190
-            };
+            }
         }
 
         position = npos;
@@ -849,13 +871,13 @@ Pacman.User = function(game, map) {
         return {
             "new": position,
             "old": oldPosition
-        };
-    };
+        }
+    }
 
     function isMidSquare(x) {
         var rem = x % 10;
         return rem > 3 || rem < 7;
-    };
+    }
 
     function calcAngle(dir, pos) {
         if (dir == RIGHT && (pos.x % 10 < 5)) {
@@ -863,32 +885,32 @@ Pacman.User = function(game, map) {
                 "start": 0.25,
                 "end": 1.75,
                 "direction": false
-            };
+            }
         } else if (dir === DOWN && (pos.y % 10 < 5)) {
             return {
                 "start": 0.75,
                 "end": 2.25,
                 "direction": false
-            };
+            }
         } else if (dir === UP && (pos.y % 10 < 5)) {
             return {
                 "start": 1.25,
                 "end": 1.75,
                 "direction": true
-            };
+            }
         } else if (dir === LEFT && (pos.x % 10 < 5)) {
             return {
                 "start": 0.75,
                 "end": 1.25,
                 "direction": true
-            };
+            }
         }
         return {
             "start": 0,
             "end": 2,
             "direction": false
-        };
-    };
+        }
+    }
 
     function drawDead(ctx, amount) {
 
@@ -907,7 +929,7 @@ Pacman.User = function(game, map) {
             half, 0, Math.PI * 2 * amount, true);
 
         ctx.fill();
-    };
+    }
 
     function draw(ctx) {
 
@@ -925,13 +947,13 @@ Pacman.User = function(game, map) {
             Math.PI * angle.end, angle.direction);
 
         ctx.fill();
-    };
+    }
 
 
     function getPos() {
         return position;
 
-    };
+    }
 
     initUser();
 
@@ -949,10 +971,10 @@ Pacman.User = function(game, map) {
         "reset": reset,
         "resetPosition": resetPosition,
         "getPos": getPos
-    };
-};
+    }
+}
 
-Pacman.Map = function(size) {
+Pacman.Map = function (size) {
 
     var height = null,
         width = null,
@@ -1013,15 +1035,15 @@ Pacman.Map = function(size) {
         map = Pacman.MAP.clone();
         height = map.length;
         width = map[0].length;
-    };
+    }
 
     function block(pos) {
         return map[pos.y][pos.x];
-    };
+    }
 
     function setBlock(pos, type) {
         map[pos.y][pos.x] = type;
-    };
+    }
 
     function drawPills(ctx) {
 
@@ -1048,7 +1070,7 @@ Pacman.Map = function(size) {
                 }
             }
         }
-    };
+    }
 
     function draw(ctx) {
 
@@ -1064,7 +1086,7 @@ Pacman.Map = function(size) {
                 drawBlock(i, j, ctx);
             }
         }
-    };
+    }
 
     function drawBlock(y, x, ctx) {
 
@@ -1090,7 +1112,7 @@ Pacman.Map = function(size) {
             }
         }
         ctx.closePath();
-    };
+    }
 
     reset();
 
@@ -1106,10 +1128,10 @@ Pacman.Map = function(size) {
         "height": height,
         "width": width,
         "blockSize": blockSize
-    };
-};
+    }
+}
 
-Pacman.Audio = function(game) {
+Pacman.Audio = function (game) {
 
     var files = [],
         endEvents = [],
@@ -1120,16 +1142,16 @@ Pacman.Audio = function(game) {
 
         var f = files[name] = document.createElement("audio");
 
-        progressEvents[name] = function(event) {
+        progressEvents[name] = function (event) {
             progress(event, name, cb);
-        };
+        }
 
         f.addEventListener("canplaythrough", progressEvents[name], true);
         f.setAttribute("preload", "true");
         f.setAttribute("autobuffer", "true");
         f.setAttribute("src", path);
         f.pause();
-    };
+    }
 
     function progress(event, name, callback) {
         if (event.loaded === event.total && typeof callback === "function") {
@@ -1137,7 +1159,7 @@ Pacman.Audio = function(game) {
             files[name].removeEventListener("canplaythrough",
                 progressEvents[name], true);
         }
-    };
+    }
 
     function disableSound() {
         for (var i = 0; i < playing.length; i++) {
@@ -1145,7 +1167,7 @@ Pacman.Audio = function(game) {
             files[playing[i]].currentTime = 0;
         }
         playing = [];
-    };
+    }
 
     function ended(name) {
 
@@ -1162,30 +1184,30 @@ Pacman.Audio = function(game) {
             }
         }
         playing = tmp;
-    };
+    }
 
     function play(name) {
         if (!game.soundDisabled()) {
-            endEvents[name] = function() {
+            endEvents[name] = function () {
                 ended(name);
-            };
+            }
             playing.push(name);
             files[name].addEventListener("ended", endEvents[name], true);
             files[name].play();
         }
-    };
+    }
 
     function pause() {
         for (var i = 0; i < playing.length; i++) {
             files[playing[i]].pause();
         }
-    };
+    }
 
     function resume() {
         for (var i = 0; i < playing.length; i++) {
             files[playing[i]].play();
         }
-    };
+    }
 
     return {
         "disableSound": disableSound,
@@ -1193,16 +1215,15 @@ Pacman.Audio = function(game) {
         "play": play,
         "pause": pause,
         "resume": resume
-    };
-};
+    }
+}
 
 
 
-var PACMAN = (function() {
+var PACMAN = (function () {
 
     var state = WAITING,
         audio = null,
-        ghosts = [],
         ghostSpecs = ["#00FFDE", "#FF0000", "#FFB8DE", "#FFB847"],
         eatenCount = 0,
         level = 0,
@@ -1212,24 +1233,24 @@ var PACMAN = (function() {
         timerStart = null,
         lastTime = 0,
         ctx = null,
-        ctx2 = null,
         timer = null,
         map = null,
         user = null,
         stored = null,
-        t = 0; //holds time of current mainlooprun
+        threat,
+        trial = null;
 
     function getTick() {
         return tick;
-    };
+    }
 
 
     function getThreat() {
         var dists = [];
 
         if (state === PLAYING) {
-            for (i = 0; i < ghosts.length; i += 1) {
-                dists.push(manhattanDistance(user.getPos(), ghosts[i].getPos()));
+            for (i = 0; i < Pacman.ghosts.length; i += 1) {
+                dists.push(manhattanDistance(user.getPos(), Pacman.ghosts[i].getPos()));
             }
 
             threat = (200 - Math.min.apply(null, dists)) / 200;
@@ -1240,7 +1261,7 @@ var PACMAN = (function() {
 
         return threat;
 
-    };
+    }
 
     function drawScore(text, position) {
         ctx.fillStyle = "#FFFFFF";
@@ -1258,12 +1279,12 @@ var PACMAN = (function() {
 
     function soundDisabled() {
         return localStorage["soundDisabled"] === "true";
-    };
+    }
 
     function startLevel() {
         user.resetPosition();
-        for (var i = 0; i < ghosts.length; i += 1) {
-            ghosts[i].reset();
+        for (var i = 0; i < Pacman.ghosts.length; i += 1) {
+            Pacman.ghosts[i].reset();
         }
         audio.play("start");
         timerStart = tick;
@@ -1277,9 +1298,12 @@ var PACMAN = (function() {
         map.reset();
         map.draw(ctx);
         startLevel();
+
+
     }
 
     function keyDown(e) {
+
         if (e.keyCode === KEY.N) {
             startNewGame();
         } else if (e.keyCode === KEY.S) {
@@ -1305,14 +1329,13 @@ var PACMAN = (function() {
             setState(EXP);
             audio.pause();
             map.draw(ctx);
-        }
-        if (state === EXP) {
+        } else if (state === EXP) {
             return trial.keyDown(e);
         } else if (state !== PAUSE) {
             return user.keyDown(e);
         }
         return true;
-    };
+    }
 
 
 
@@ -1322,17 +1345,17 @@ var PACMAN = (function() {
         if (user.getLives() > 0) {
             startLevel();
         }
-    };
+    }
 
     function setState(nState) {
         state = nState;
         stateChanged = true;
-    };
+    }
 
     function collided(user, ghost) {
         return (Math.sqrt(Math.pow(ghost.x - user.x, 2) +
             Math.pow(ghost.y - user.y, 2))) < 10;
-    };
+    }
 
     function drawFooter() {
 
@@ -1376,75 +1399,71 @@ var PACMAN = (function() {
 
         ghostPos = [];
 
-        for (i = 0, len = ghosts.length; i < len; i += 1) {
-            ghostPos.push(ghosts[i].move(ctx));
+        for (i = 0, len = Pacman.ghosts.length; i < len; i += 1) {
+            ghostPos.push(Pacman.ghosts[i].move(ctx));
         }
 
         u = user.move(ctx);
 
-        for (i = 0, len = ghosts.length; i < len; i += 1) {
+        for (i = 0, len = Pacman.ghosts.length; i < len; i += 1) {
             redrawBlock(ghostPos[i].old);
         }
         redrawBlock(u.old);
 
-        for (i = 0, len = ghosts.length; i < len; i += 1) {
-            ghosts[i].draw(ctx);
+        for (i = 0, len = Pacman.ghosts.length; i < len; i += 1) {
+            Pacman.ghosts[i].draw(ctx);
         }
         user.draw(ctx);
 
         userPos = u["new"];
 
-        for (i = 0, len = ghosts.length; i < len; i += 1) {
+        for (i = 0, len = Pacman.ghosts.length; i < len; i += 1) {
             if (collided(userPos, ghostPos[i]["new"])) {
-                if (ghosts[i].isVunerable()) {
+                if (Pacman.ghosts[i].isVunerable()) {
                     audio.play("eatghost");
-                    ghosts[i].eat();
+                    Pacman.ghosts[i].eat();
                     eatenCount += 1;
                     nScore = eatenCount * 50;
                     drawScore(nScore, ghostPos[i]);
                     user.addScore(nScore);
                     setState(EATEN_PAUSE);
                     timerStart = tick;
-                } else if (ghosts[i].isDangerous()) {
+                } else if (Pacman.ghosts[i].isDangerous()) {
                     audio.play("die");
                     setState(DYING);
                     timerStart = tick;
                 }
             }
         }
-    };
+    }
 
     function mainLoop() {
 
+
         var diff;
-        t = new Date().getTime();
-        threat = getThreat();
-        //console.log(threat,t-expstart);
 
         if (state !== PAUSE && state !== EXP) {
             ++tick;
         }
 
         //map.drawPills(ctx);
-
+        //console.log(state);
 
         if (state === PLAYING) {
 
-
-            if (threat > 0.7 && t - trialStart > iti) {
-                trialStart = t; //record start of trial
-                console.log(threat);
+            //check if new trial can be started, if so, start it
+            if (trial.determineTrial()) {
                 stored = state;
                 setState(EXP);
                 audio.pause();
                 map.draw(ctx);
+
             }
 
             mainDraw();
         } else if (state === WAITING && stateChanged) {
             stateChanged = false;
             map.draw(ctx);
-            trialStart = t; //reset trial clock
             dialog("Press N to start a New game");
         } else if (state === EATEN_PAUSE &&
             (tick - timerStart) > (Pacman.FPS / 3)) {
@@ -1453,12 +1472,11 @@ var PACMAN = (function() {
         } else if (state === DYING) {
             if (tick - timerStart > (Pacman.FPS * 2)) {
                 loseLife();
-                trialStart = t; //reset trial clock
             } else {
                 redrawBlock(userPos);
-                for (i = 0, len = ghosts.length; i < len; i += 1) {
+                for (i = 0, len = Pacman.ghosts.length; i < len; i += 1) {
                     redrawBlock(ghostPos[i].old);
-                    ghostPos.push(ghosts[i].draw(ctx));
+                    ghostPos.push(Pacman.ghosts[i].draw(ctx));
                 }
                 user.drawDead(ctx, (tick - timerStart) / (Pacman.FPS * 2));
             }
@@ -1478,7 +1496,7 @@ var PACMAN = (function() {
             }
         } else if (state === EXP && !(trial.hasResponded())) {
 
-            trial.present()
+            trial.present();
 
         } else if (trial.hasResponded()) {
 
@@ -1486,8 +1504,6 @@ var PACMAN = (function() {
             audio.resume();
             map.draw(ctx);
             setState(stored);
-        
-
 
         }
 
@@ -1497,13 +1513,13 @@ var PACMAN = (function() {
 
 
     function eatenPill() {
-        audio.play("eatpill");
+        //audio.play("eatpill");
         timerStart = tick;
         eatenCount = 0;
-        /*for (i = 0; i < ghosts.length; i += 1) {
-            ghosts[i].makeEatable(ctx);
+        /*for (i = 0; i < Pacman.ghosts.length; i += 1) {
+            Pacman.ghosts[i].makeEatable(ctx);
         }*/
-    };
+    }
 
     function completedLevel() {
         setState(WAITING);
@@ -1511,14 +1527,14 @@ var PACMAN = (function() {
         map.reset();
         user.newLevel();
         startLevel();
-    };
+    }
 
     function keyPress(e) {
         if (state !== WAITING && state !== PAUSE) {
             e.preventDefault();
             e.stopPropagation();
         }
-    };
+    }
 
     function init(wrapper, root) {
 
@@ -1546,8 +1562,10 @@ var PACMAN = (function() {
             ghost = new Pacman.Ghost({
                 "getTick": getTick
             }, map, ghostSpecs[i]);
-            ghosts.push(ghost);
+            Pacman.ghosts.push(ghost);
         }
+
+
         trial = new Pacman.Trial();
 
         map.draw(ctx);
@@ -1566,10 +1584,14 @@ var PACMAN = (function() {
 
 
 
-        load(audio_files, function() {
+        load(audio_files, function () {
             loaded();
         });
-    };
+    }
+
+    function endGame() {
+        window.location = newurl;
+    }
 
     function load(arr, callback) {
 
@@ -1577,13 +1599,15 @@ var PACMAN = (function() {
             callback();
         } else {
             var x = arr.pop();
-            audio.load(x[0], x[1], function() {
+            audio.load(x[0], x[1], function () {
                 load(arr, callback);
             });
         }
-    };
+    }
 
     function loaded() {
+
+
 
         dialog("Press N to Start");
 
@@ -1591,14 +1615,16 @@ var PACMAN = (function() {
         document.addEventListener("keypress", keyPress, true);
 
         gameStart = new Date().getTime();
-        trialStart = gameStart;
 
         timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
-    };
+
+    }
 
     return {
-        "init": init
-    };
+        "init": init,
+        "getThreat": getThreat,
+        "endGame": endGame,
+    }
 
 }());
 
@@ -1658,7 +1684,7 @@ var KEY = {
     'APOSTROPHE': 222
 };
 
-(function() {
+(function () {
     /* 0 - 9 */
     for (var i = 48; i <= 57; i++) {
         KEY['' + (i - 48)] = i;
@@ -2072,8 +2098,8 @@ Pacman.WALLS = [
     }]
 ];
 
-Object.prototype.clone = function() {
-    var i, newObj = (this instanceof Array) ? [] : {};
+Object.prototype.clone = function () {
+    var i, newObj = (this instanceof Array) ? [] : {}
     for (i in this) {
         if (i === 'clone') {
             continue;
@@ -2085,4 +2111,4 @@ Object.prototype.clone = function() {
         }
     }
     return newObj;
-};
+}

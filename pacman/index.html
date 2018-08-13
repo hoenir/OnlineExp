@@ -47,12 +47,27 @@
                       </div>
                      
                     </div>
-                     <div class="row">
-                    <div class="small-2 small-centered columns">
-                    <a href="pacman.html" class="button">Start</a>
-                    </div>
+                    <p>Vul je
+                        <b>id code (EMS)</b> in en klik <b>start</b> om naar het experiment te gaan.</p>
+                    <div class="row">
+                        <div class="small-2 small-centered columns">
+                            <form id="idform" data-abide="ajax">
+                                <input type="text" name="pid" Value="" id="pid" required>
+                                <small class="error">Geef een id code aub.</small>
+                                <button type="submit">Start!</button>
+                            </form>
+    
+    
+                        </div>
                     </div>
         
+                </div>
+            </div>
+            <div class="row">
+                <div class="large-4 large-offset-7 columns">
+                    <a href="http://www.gestaltrevision.be">
+                        <img src="../img/headerlogo.png" alt="gestaltrevision">
+                    </a>
                 </div>
             </div>
 
@@ -68,6 +83,35 @@
             </script>
 
             <script>
+            var pid = ""
+
+            url = "exp.html"
+
+
+
+
+            $('#idform').on('valid', function() {
+                //console.log('valid!');
+                newurl = url.concat("?", $('#idform').serialize());
+                //window.location = newurl;
+                openwindow(newurl) //if you want full screen popup
+            });
+
+            function openwindow(url) {
+                                        popup = window.open(url,'Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+screen.availWidth+',height='+screen.availHeight+'');
+                                        popup.onunload = function() { location.reload(true) }
+                                }
+
+
+            $(document).keypress(function(event) {
+                if (event.keyCode == 13) {
+                    $('#idform').submit();
+
+                }
+            });
+
+
+
             Plw = function() {
 
                 var dotsperframe = 15,
