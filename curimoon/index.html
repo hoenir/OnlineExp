@@ -406,12 +406,12 @@
       stimulus: '<p></p>',
       choices: ['y', 'n'],
       prompt: "<p>Did you see the image before, yes or no? <b>Press y or n</b>.</p>",
+      data: {
+        test_part: 'familiar'
+      },
       data: jsPsych.timelineVariable('data'),
       on_finish: function (data) {
         data.correct = data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.old);
-      },
-      data: {
-        test_part: 'familiar'
       }
     };
 
