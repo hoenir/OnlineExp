@@ -48,18 +48,23 @@
     xobj.send(null);
   }
 
+
   function saveData(name, data) {
+
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'write_data.php'); // 'write_data.php' is the path to the php file.
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    var out = JSON.stringify({
-      filename: name,
-      filedata: data
-    })
-    //console.log(out);
-    xhr.send(out);
-    
+    // Met deze code kan je de respons van de server bekijken in het console venster
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        console.log(xhr.response);
+      }
+    }
+    xhr.open('POST', 'https://www.psytests.be/tests/curimoon/curimoon.php');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send("filename=" + name + "&prolific_id=" + JSON.stringify(subject_id) + "&filedata=" + JSON.stringify(data));
   }
+
+
+
 
   function formatDate(date) {
     if (typeof date.getMonth === 'function') {
@@ -75,7 +80,7 @@
 
   var subject_id = getParameterByName('PROLIFIC_PID');
   // how many stimuli per session?
-  var nb_stim_per_session = 20;
+  var nb_stim_per_session = 5;
   // prop of stimuli for phase 1
   var prop_stim_phase1 = .6;
   var nb_stim_phase1 = Math.round(prop_stim_phase1 * nb_stim_per_session);
