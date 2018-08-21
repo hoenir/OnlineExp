@@ -135,7 +135,10 @@
     /* define welcome message trial */
     var welcome = {
       type: "html-keyboard-response",
-      stimulus: "Welcome to the experiment. Press any key to begin."
+      stimulus: "Welcome to the experiment. Press any key to begin.",
+      data: {
+        test_part: 'instructions'
+      }
     };
     timeline.push(welcome);
 
@@ -152,14 +155,20 @@
         "<li><b>Participation and withdrawal</b>:  Your participation in this study is completely voluntary and you may refuse to participate or you may choose to withdraw at any time without penalty.</li>" +
         "<li><b>How to contact the researchers</b>: If you have questions or concerns about your participation or payment, or want to request a summary of research findings, please contact Sander Van de Cruys (KU Leuven), at sander.vandecruys@kuleuven.be.</li></ul>" +
         "<p>The nature and purpose of this research have been sufficiently explained and I agree to participate in this study.  I understand that I am free to withdraw at any time without incurring any penalty.</p>" +
-        "<p>Please consent by clicking the button below to continue. Otherwise, please exit the study at this time.</p></div>"
+        "<p>Please consent by clicking the button below to continue. Otherwise, please exit the study at this time.</p></div>",
+      data: {
+        test_part: 'instructions'
+      }
     };
     timeline.push(consent);
 
 
     timeline.push({
       type: 'fullscreen',
-      fullscreen_mode: true
+      fullscreen_mode: true,
+      data: {
+        test_part: 'instructions'
+      }
     });
 
     /* define instructions trial */
@@ -174,7 +183,10 @@
         "</div>" +
         "<p>Subsequently you will be asked several questions about the image. Specifically, we ask you...</p>" +
         "<p>Press any key to continue with the instructions.</p>",
-      post_trial_gap: 0
+      post_trial_gap: 0,
+      data: {
+        test_part: 'instructions'
+      }
     };
     timeline.push(instructions1);
 
@@ -192,7 +204,10 @@
         "This describes the positive 'click' you sometimes experience, when the pieces of the 'puzzle' fall together and you 'understand' the image.</li>" +
         "<li>Finally, we will ask you how satisfied you are with the solution</li></ul>Don't worry if this list seems overwhelming, you will be guided through the whole process with reminders.</p>" +
         "<p>Press any key to begin the experiment.</p></div>",
-      post_trial_gap: 1000
+      post_trial_gap: 1000,
+      data: {
+        test_part: 'instructions'
+      }
     };
     timeline.push(instructions2);
 
@@ -212,7 +227,10 @@
       type: 'image-keyboard-response',
       stimulus: jsPsych.timelineVariable('mooney'),
       choices: jsPsych.NO_KEYS,
-      trial_duration: 700
+      trial_duration: 700,
+      data: {
+        test_part: 'mooney1'
+      }
     };
 
 
@@ -224,7 +242,10 @@
       prompt: "",
       min: 0,
       max: 10,
-      start: 5
+      start: 5,
+      data: {
+        test_part: 'ratingSolved'
+      }
     };
 
 
@@ -236,7 +257,10 @@
       prompt: "",
       min: 0,
       max: 10,
-      start: 5
+      start: 5,
+      data: {
+        test_part: 'ratingSolvable'
+      }
     };
 
     var question_curious = {
@@ -246,14 +270,20 @@
       prompt: "",
       min: 0,
       max: 10,
-      start: 5
+      start: 5,
+      data: {
+        test_part: 'ratingCurious'
+      }
     };
 
     var mooney2 = {
       type: 'image-keyboard-response',
       stimulus: jsPsych.timelineVariable('mooney'),
       choices: jsPsych.NO_KEYS,
-      trial_duration: 2000
+      trial_duration: 2000,
+      data: {
+        test_part: 'mooney2'
+      }
     };
 
     var solved = {
@@ -264,6 +294,9 @@
         rows: 1,
         columns: 40
       }],
+      data: {
+        test_part: 'recognition'
+      }
     };
 
     var solution = {
@@ -273,6 +306,9 @@
       },
       choices: jsPsych.NO_KEYS,
       trial_duration: 2500,
+      data: {
+        test_part: 'reveal'
+      }
     };
 
     var question_aha = {
@@ -282,7 +318,10 @@
       prompt: "",
       min: 0,
       max: 10,
-      start: 5
+      start: 5,
+      data: {
+        test_part: 'ratingAha'
+      }
     };
 
     var question_satisfied = {
@@ -292,7 +331,10 @@
       prompt: "",
       min: 0,
       max: 10,
-      start: 5
+      start: 5,
+      data: {
+        test_part: 'ratingSatisfied'
+      }
     };
 
 
@@ -316,6 +358,9 @@
         "<p>In the next phase you will again see a series of distorted images, some of which you have already encountered in the previous phase.</p>" +
         "<p>You will be asked recognize what is depicted if you can and subsequently indicate whether the image was an old or a new one (one not seen in the previous phase.</p>" +
         "<p>Press any key to start the new phase</p>",
+      data: {
+        test_part: 'instructions'
+      }
     };
     timeline.push(ph2_instruct);
 
@@ -336,7 +381,10 @@
       type: 'image-keyboard-response',
       stimulus: jsPsych.timelineVariable('mooney'),
       choices: jsPsych.NO_KEYS,
-      trial_duration: 2000
+      trial_duration: 2000,
+      data: {
+        test_part: 'ph2_mooney'
+      }
     };
 
 
@@ -347,6 +395,9 @@
         rows: 1,
         columns: 40
       }],
+      data: {
+        test_part: 'ph2_recognition'
+      }
     };
 
 
@@ -358,6 +409,9 @@
       data: jsPsych.timelineVariable('data'),
       on_finish: function (data) {
         data.correct = data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.old);
+      },
+      data: {
+        test_part: 'familiar'
       }
     };
 
@@ -375,6 +429,9 @@
       type: "html-keyboard-response",
       stimulus: "<h1>Thank you!</h1><p>You finished the complete experiment.</p>" +
         "<p>Press any key to return to...</p>",
+      data: {
+        test_part: 'instructions'
+      }
     };
     timeline.push(debrief);
 
