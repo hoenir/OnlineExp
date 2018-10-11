@@ -82,7 +82,7 @@
   var experiment_name = 'mooneymood'
   var subject_id = getParameterByName('PROLIFIC_PID');
   // how many stimuli per session?
-  var nb_stim_per_session = 10;
+  var nb_stim_per_session = 20;
   var condition = 0; //if 0: upright mooneys 
   var stimlist = [];
 
@@ -102,22 +102,11 @@
 
     // set old/new variable for determining phase 
     for (i = 0; i < stimlist.length; i++) {
-
-      if (i < nb_stim_phase1) {
-        stimlist[i]['data'] = {
-          old: 'y'
-        };
-      } else {
-        stimlist[i]['data'] = {
-          old: 'n'
-        };
-      }
       images.push(stimlist[i]['mooney'])
       images.push(stimlist[i]['solution'])
 
     }
 
-    ph1_stimlist = stimlist.slice(0, nb_stim_phase1); //subset for phase 1
   }
 
 
@@ -226,6 +215,19 @@
 
   /* phase 2 */
 
+  /* define instructions trial */
+  var instructions2 = {
+      type: "html-keyboard-response",
+      stimulus: "<h3>Start part 2</h3>" +
+        "<p>This is a memory experiment that consists of 3 short parts. In the first part you'll have to fill in a brief emotion-questionnaire." +
+        "<p>Press any key to start the second part of the experiment.</p>",
+      post_trial_gap: 0,
+      data: {
+        test_part: 'instructions'
+      }
+    };
+    timeline.push(instructions2);
+
   var fixation = {
     type: 'html-keyboard-response',
     stimulus: '<div style="font-size:60px;">+</div>',
@@ -276,8 +278,7 @@
   var posttest = {
     type: 'survey-text',
     questions: [{
-      prompt: '<h3>Part 1: Memory</h3><p>Contrary to what we said earlier, we now want you to try to <strong>remember as many words as possible from the emotion questionnaire</strong> you completed in the beginning of the experiment. So we are <strong>not</strong> interested in whether you remember the images you just saw, only in the emotion words you can still remember from the first part. Please list them below, separated by comma'
-      s < /p>',
+      prompt: '<h3>Part 3: Memory</h3><p>Contrary to what we said earlier, we now want you to try to <strong>remember as many words as possible from the emotion questionnaire</strong> you completed in the beginning of the experiment. So we are <strong>not</strong> interested in whether you remember the images you just saw, only in the emotion words you can still remember from the first part. Please list them below, separated by comma's</p>',
       rows: 5,
       columns: 50
     }],
@@ -287,21 +288,11 @@
   };
 
 
-  var phase2_procedure = {
-    timeline: [ph2_fixation, ph2_mooney, ph2_oldornew, ph2_solved],
-    timeline_variables: stimlist,
-    repetitions: 1,
-    randomize_order: true
-  }
-  timeline.push(phase2_procedure);
-
-
-
   /* define debrief */
 
   var debrief = {
     type: "html-keyboard-response",
-    stimulus: "<h1>Thank you!</h1><p>You finished the complete experiment.</p>" +
+    stimulus: "<h1>Thank you!</h1><p>You completed the experiment. As you noticed we were interested in incidental (non-intentional) learning (not in your memory for images), and in how it is affected by in-between intentional learning of different materials. Apologies for misleading you.</p>" +
       "<p>Press any key to return to...</p>",
     data: {
       test_part: 'instructions'
