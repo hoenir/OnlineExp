@@ -28,6 +28,12 @@ jsPsych.plugins["animate-transparency"] = (function () {
                 default: null,
                 description: 'How long to show trial before it ends.'
             },
+            orientation: {
+                type: jsPsych.plugins.parameterType.INT,
+                pretty_name: 'Mooney image orientation',
+                default: 0,
+                description: 'Mooney image orientation'
+            },
             choices: {
                 type: jsPsych.plugins.parameterType.KEYCODE,
                 pretty_name: 'Choices',
@@ -51,9 +57,17 @@ jsPsych.plugins["animate-transparency"] = (function () {
 
         var css = document.createElement("style");
         css.type = "text/css";
-        css.innerHTML = "@keyframes fadeIn { from {opacity: 0;} to { opacity: 1;}} #bg {background: url(" + trial.stimuli[0] +") no-repeat;}";
+        css.innerHTML = "@keyframes fadeIn { from {opacity: 0;} to { opacity: 1;}} #bg {background: url(" + trial.stimuli[0] +") no-repeat;" + 
+        "-webkit-transform: rotate("+ trial.data['condition'] + "deg);" +
+        "-moz-transform: rotate(" + trial.data['condition'] + "deg);" +
+        "-ms-transform: rotate("+ trial.data['condition'] + "deg);" +
+        "-o-transform: rotate("+ trial.data['condition'] + "deg);" +
+        "transform: rotate("+ trial.data['condition'] + "deg);}";
+
         document.body.appendChild(css);
         
+        
+
         var style = "opacity:0; animation: fadeIn " + trial.trial_duration/1000 + "s ease .2s forwards;"
         // show image
 

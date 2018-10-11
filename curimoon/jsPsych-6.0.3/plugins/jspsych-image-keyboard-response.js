@@ -50,6 +50,12 @@ jsPsych.plugins["image-keyboard-response"] = (function() {
         default: null,
         description: 'How long to show trial before it ends.'
       },
+      orientation: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'image orientation',
+        default: 0,
+        description: 'Image orientation.'
+      },
       response_ends_trial: {
         type: jsPsych.plugins.parameterType.BOOL,
         pretty_name: 'Response ends trial',
@@ -61,7 +67,13 @@ jsPsych.plugins["image-keyboard-response"] = (function() {
 
   plugin.trial = function(display_element, trial) {
 
-    var new_html = '<img src="'+trial.stimulus+'" id="jspsych-image-keyboard-response-stimulus"></img>';
+    style = "-webkit-transform: rotate("+ trial.orientation + "deg);" +
+    "-moz-transform: rotate(" + trial.orientation + "deg);" +
+    "-ms-transform: rotate("+ trial.orientation + "deg);" +
+    "-o-transform: rotate("+ trial.orientation + "deg);" +
+    "transform: rotate("+ trial.orientation + "deg);}";
+
+    var new_html = '<img src="'+trial.stimulus+'" id="jspsych-image-keyboard-response-stimulus style="' +style+ '"></img>';
 
     // add prompt
     if (trial.prompt !== null){

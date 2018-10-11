@@ -79,10 +79,10 @@
   }
 
 
-
+  var experiment_name = 'curimoon'
   var subject_id = getParameterByName('PROLIFIC_PID');
   // how many stimuli per session?
-  var nb_stim_per_session = 10;
+  var nb_stim_per_session = 20;
   // prop of stimuli for phase 1
   var prop_stim_phase1 = .6;
   var nb_stim_phase1 = Math.round(prop_stim_phase1 * nb_stim_per_session);
@@ -129,6 +129,7 @@
     // this adds a property called 'subject' to every trial
     jsPsych.data.addProperties({
       subject: subject_id,
+      experiment_name: experiment_name
     });
 
     /* create timeline */
@@ -270,7 +271,7 @@
       type: 'survey-text',
       data: jsPsych.timelineVariable('correct_resp'),
       questions: [{
-        prompt: "Did you see what was actually depicted in the image? If so, or if you can make a good guess, use one or two words to describe it. If not, just leave blank and click continue",
+        prompt: 'Did you see what was actually depicted in the image? If so, use just <strong>one or two words</strong> (not more!) to describe it. If not, just leave blank and click continue. Note that it is ok to name just the basic level category, e.g. when you see a parrot in the image, "parrot" will obviously be a correct answer but also also "bird". However, "animal" will <strong>not</strong> be counted as a correct response. You do not need to describe the image in full, just name the main object in it.',
         rows: 1,
         columns: 40
       }],
@@ -386,7 +387,7 @@
     var ph2_solved = {
       type: 'survey-text',
       questions: [{
-        prompt: 'Did you see what was actually depicted in the image? If so, use just <strong>one or two words</strong> to describe it. If not, just leave blank and click continue. Note that it is ok to name just the basic level category, e.g. when you see a parrot in the image, "parrot" will obviously be a correct answer but also also "bird". However, "animal" will <strong>not</strong> be counted as a correct response. You do not need to describe the image in full, just name the main object in it.',
+        prompt: 'Did you see what was actually depicted in the image? If so, use just <strong>one or two words</strong> (not more!) to describe it. If not, just leave blank and click continue. Note that it is ok to name just the basic level category, e.g. when you see a parrot in the image, "parrot" will obviously be a correct answer but also also "bird". However, "animal" will <strong>not</strong> be counted as a correct response. You do not need to describe the image in full, just name the main object in it.',
         rows: 1,
         columns: 40
       }],
@@ -455,7 +456,8 @@
 
     var curiosity_questionnaire = {
       type: 'survey-likert',
-      preamble: '<div style='word-wrap: break-word; width: 900px'><h3>Questionnaire</h3><p>This is the last step of the experiment. A number of statements that people use to describe themselves are given below.  Read each statement and indicate how you generally feel using the options below.  There are no right or wrong answers.  Do not spend too much time on any one statement but give the answer that seems to describe how you <strong>generally</strong> feel.</p>',
+      preamble: '<div style='
+      word - wrap: break -word;width: 900 px '><h3>Questionnaire</h3><p>This is the last step of the experiment. A number of statements that people use to describe themselves are given below.  Read each statement and indicate how you generally feel using the options below.  There are no right or wrong answers.  Do not spend too much time on any one statement but give the answer that seems to describe how you <strong>generally</strong> feel.</p>',
       questions: formattedqitems,
       data: {
         test_part: 'curiosity_questionnaire'
@@ -481,6 +483,10 @@
       timeline: timeline,
       show_progress_bar: true,
       preload_images: images,
+      exclusions: {
+        min_width: 800,
+        min_height: 600
+      },
       on_finish: function () {
         jsPsych.data.addProperties({
           totalTime: jsPsych.totalTime()
