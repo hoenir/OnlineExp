@@ -57,24 +57,20 @@ jsPsych.plugins["animate-transparency"] = (function () {
 
         var css = document.createElement("style");
         css.type = "text/css";
-        css.innerHTML = "@keyframes fadeIn { from {opacity: 0;} to { opacity: 1;}} #bg {background: url(" + trial.stimuli[0] +") no-repeat;" + 
-        "-webkit-transform: rotate("+ trial.data['condition'] + "deg);" +
-        "-moz-transform: rotate(" + trial.data['condition'] + "deg);" +
-        "-ms-transform: rotate("+ trial.data['condition'] + "deg);" +
-        "-o-transform: rotate("+ trial.data['condition'] + "deg);" +
-        "transform: rotate("+ trial.data['condition'] + "deg);}";
+        css.innerHTML = "@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;}}"  +
+        "#topstim { opacity:0; animation: fadeIn " + trial.trial_duration/1000 + "s ease .2s forwards;}" +
+        "#bottomstim {-webkit-transform: rotate("+ String(trial.orientation) + "deg);" +
+        "-moz-transform: rotate(" + String(trial.orientation) + "deg);" +
+        "-ms-transform: rotate("+ String(trial.orientation) + "deg);" +
+        "-o-transform: rotate("+ String(trial.orientation) + "deg);" +
+        "transform: rotate("+ String(trial.orientation) + "deg);}";
+
 
         document.body.appendChild(css);
         
-        
-
-        var style = "opacity:0; animation: fadeIn " + trial.trial_duration/1000 + "s ease .2s forwards;"
-        // show image
-
-        display_element.innerHTML = '<div id="bg"><img src="' + trial.stimuli[1] + '" id="jspsych-animate-transparency-to-image" style="' +style+ '"></img></div>'
-       
-
-     
+        display_element.innerHTML =  '<div id="container" style="position:relative;">' +
+        '<img style="position: absolute;top: 0;left: 0;z-index: -1;" id="bottomstim" src="' + trial.stimuli[0] + 
+        '"><img style="position:relative; z-index:1" id="topstim" src="'+ trial.stimuli[1] +'"></div>';
         
         if (trial.prompt !== null) {
             display_element.innerHTML += trial.prompt;

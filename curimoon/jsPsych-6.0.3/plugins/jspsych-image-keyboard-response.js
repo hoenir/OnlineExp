@@ -67,13 +67,13 @@ jsPsych.plugins["image-keyboard-response"] = (function() {
 
   plugin.trial = function(display_element, trial) {
 
-    style = "-webkit-transform: rotate("+ trial.orientation + "deg);" +
-    "-moz-transform: rotate(" + trial.orientation + "deg);" +
-    "-ms-transform: rotate("+ trial.orientation + "deg);" +
-    "-o-transform: rotate("+ trial.orientation + "deg);" +
-    "transform: rotate("+ trial.orientation + "deg);}";
+    style = "-webkit-transform: rotate("+ String(trial.orientation) + "deg);" +
+    "-moz-transform: rotate(" + String(trial.orientation) + "deg);" +
+    "-ms-transform: rotate("+ String(trial.orientation) + "deg);" +
+    "-o-transform: rotate("+ String(trial.orientation) + "deg);" +
+    "transform: rotate("+ String(trial.orientation) + "deg);}";
 
-    var new_html = '<img src="'+trial.stimulus+'" id="jspsych-image-keyboard-response-stimulus style="' +style+ '"></img>';
+    var new_html = '<img src="'+trial.stimulus+'" id="jspsych-image-keyboard-response-stimulus" style="' +style+ '"></img>';
 
     // add prompt
     if (trial.prompt !== null){
