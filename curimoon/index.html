@@ -119,12 +119,31 @@
       condition = 180
     }
 
-    console.log(condition)
+    // panas items
+     qitems = ["Interested", "Distressed", "Excited", "Upset", "Strong", "Guilty", "Scared", "Hostile", "Enthusiastic",
+      "Proud", "Irritable", "Alert", "Ashamed", "Inspired", "Nervous", "Determined", "Attentive", "Jittery", "Active",
+      "Afraid"
+    ];
+
+    //randomize item order 
+    shuffleArray(qitems);
+
+    // put items in format required by survey-likert extension
+    formattedqitems = []
+    for (let i = 0; i < qitems.length; i++) {
+      formattedqitems.push({
+        prompt: qitems[i],
+        labels: ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+        required: true
+      })
+    }
+
     // record extra info in the jsPsych data
     // this adds a property called 'subject' to every trial
     jsPsych.data.addProperties({
       subject: subject_id,
       condition: condition,
+      panasitemorder: qitems
       experiment_name: experiment_name
     });
 
@@ -177,22 +196,6 @@
     timeline.push(instructions1);
 
     /* phase 1 */
-
-    qitems = ["Interested", "Distressed", "Excited", "Upset", "Strong", "Guilty", "Scared", "Hostile", "Enthusiastic",
-      "Proud", "Irritable", "Alert", "Ashamed", "Inspired", "Nervous", "Determined", "Attentive", "Jittery", "Active",
-      "Afraid"
-    ];
-
-  shuffleArray(qitems);
-  formattedqitems = []
-
-  for (let i = 0; i < qitems.length; i++) {
-    formattedqitems.push({
-      prompt: qitems[i],
-      labels: ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
-      required: true
-    })
-  }
 
 
   var panas_questionnaire = {
