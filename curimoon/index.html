@@ -79,15 +79,14 @@
   }
 
 
-  var experiment_name = 'curimoon'
+  var experiment_name = 'mooneymood'
   var subject_id = getParameterByName('PROLIFIC_PID');
   // how many stimuli per session?
-  var nb_stim_per_session = 20;
-  // prop of stimuli for phase 1
-  var prop_stim_phase1 = .6;
-  var nb_stim_phase1 = Math.round(prop_stim_phase1 * nb_stim_per_session);
+  var nb_stim_per_session = 30;
+  var condition = 0; //if 0: upright mooneys 
   var stimlist = [];
-  var ph1_stimlist = [];
+  var finishurl= "";
+
   var images = ["img/018tt.jpg", "img/018gs.jpg"] // the list of images to preload
 
   loadJSON('stimset.json', function (response) {
@@ -104,31 +103,28 @@
 
     // set old/new variable for determining phase 
     for (i = 0; i < stimlist.length; i++) {
-
-      if (i < nb_stim_phase1) {
-        stimlist[i]['data'] = {
-          old: 'y'
-        };
-      } else {
-        stimlist[i]['data'] = {
-          old: 'n'
-        };
-      }
       images.push(stimlist[i]['mooney'])
       images.push(stimlist[i]['solution'])
 
     }
 
-    ph1_stimlist = stimlist.slice(0, nb_stim_phase1); //subset for phase 1
   }
 
 
   function runExp() {
 
+    // randomly assign half of subjects to condition with inverted mooneys (ori 180)
+    number = subject_id.match(/\d+/g).map(Number)[0];
+    if (number % 2 == 0) {
+      condition = 180
+    }
+
+    console.log(condition)
     // record extra info in the jsPsych data
     // this adds a property called 'subject' to every trial
     jsPsych.data.addProperties({
       subject: subject_id,
+      condition: condition,
       experiment_name: experiment_name
     });
 
@@ -149,8 +145,7 @@
       type: "html-button-response",
       choices: ["I agree"],
       stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Please consider this information carefully before deciding whether to participate in this research</h3>" +
-        "<ul style='text-align: left; font-size: .8em;'><li><b>Purpose of the research</b>: To examine how people process images.</li>" +
-        "<li><b>What you will do in this research</b>:  Stimuli (images) will be presented on the computer and you will be asked different questions about them.</li>" +
+        "<ul style='text-align: left; font-size: .8em;'>" +
         "<li><b>Time required</b>: Participation will take between 15 and 45 minutes to complete.</li>" +
         "<li><b>Risks</b>:  There are no anticipated risks associated with participating in this study. The effects of participating should be comparable to those you would experience from viewing a computer monitor for 30 minutes and using a mouse or keyboard.</li>" +
         "<li><b>Benefits</b>:  This study provides no benefits to you individually except for the monetary reward. The study provides important information about the nature of perception and learning.</li>" +
@@ -165,333 +160,157 @@
     };
     timeline.push(consent);
 
-
-    timeline.push({
-      type: 'fullscreen',
-      fullscreen_mode: true,
-      data: {
-        test_part: 'instructions'
-      }
-    });
-
     /* define instructions trial */
     var instructions1 = {
-      type: "html-keyboard-response",
-      stimulus: "<h3>Instructions</h3><p>This experiment consist of two tasks. In the first task, you will see a series of distorted images like the one below on the left</p>" +
-        "<p>As you can see in the righthand image, the distorted images are derived from actual photographs.</p>" +
-        "<p>In what follows, you will very <strong>briefly</strong> be presented with <strong>only</strong> the distorted image.</p> " +
-        "<div style='width: 800px;'>" +
-        "<div style='float: left;'><img src='img/018tt.jpg' height='300' width='300'></img>" +
-        "<div style='float: right;'><img src='img/018gs.jpg' height='300' width='300'></img>" +
-        "</div>" +
-        "<p>Subsequently you will be asked several questions about the image. Specifically, we ask you...</p>" +
-        "<p>Press any key to continue with the instructions.</p>",
+      type: "html-button-response",
+      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Instructions: read carefully!</h3>" +
+        "<p>This is a memory experiment that consists of 3 short parts. In the first part you'll have to fill in a brief emotion-questionnaire. " +
+        "In the second part you'll see a series of black and white images, that you'll have to try to remember in the last part.</p>" +
+        "<p>Please complete each task immediately after the other. The experiment will only take about 10 minutes in total.</p>" +
+        "<p>Press enter to start the first part of the experiment.</p></div>",
       post_trial_gap: 0,
+      choices: ['Start'],
       data: {
         test_part: 'instructions'
       }
     };
     timeline.push(instructions1);
 
-    /* define instructions trial */
-    var instructions2 = {
+    /* phase 1 */
+
+    qitems = ["Interested", "Distressed", "Excited", "Upset", "Strong", "Guilty", "Scared", "Hostile", "Enthusiastic",
+      "Proud", "Irritable", "Alert", "Ashamed", "Inspired", "Nervous", "Determined", "Attentive", "Jittery", "Active",
+      "Afraid"
+    ];
+
+  shuffleArray(qitems);
+  formattedqitems = []
+
+  for (let i = 0; i < qitems.length; i++) {
+    formattedqitems.push({
+      prompt: qitems[i],
+      labels: ["Very slightly or not at all", "A little", "Moderately", "Quite a bit", "Extremely"],
+      required: true
+    })
+  }
+
+
+  var panas_questionnaire = {
+    type: 'survey-likert',
+    preamble: "<div style='word-wrap: break-word; width: 900px'><h3>Part 1: Questionnaire</h3><p>This scale consists of a number of words that describe different feelings and emotions. Read each item and indicate the extent you have felt this way <strong>over the past week</strong></p></div>",
+    questions: formattedqitems,
+    data: {
+      test_part: 'panas_questionnaire'
+    }
+  };
+
+  timeline.push(panas_questionnaire);
+
+  /* phase 2 */
+
+  /* define instructions trial */
+  var instructions2 = {
       type: "html-keyboard-response",
-      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Instructions</h3>" +
-        "<ul style='text-align: left'><li>Whether you have recognized what was in the image. This is a difficult question," +
-        " especially when you have seen the image only briefly. It is normal that you will not recognize many, probably most, of the images.</li>" +
-        "<li>Next, we ask you whether you think you will be able to solve the image (recognize what's in it) given unlimited time.</li>" +
-        "<li>Next, we ask you how curious you are about the solution.</li>" +
-        "<li>Next, you'll see the image again for a bit longer, and you get the chance to actually describe what was in the image if you recognized it by now." +
-        "If you still don't know, don't worry. It is meant to be very difficult. You'll soon get to see the solution, but try to make a guess if you can.</li>" +
-        "<li>Next, you'll see the actual solution and you'll be asked to indicate how strong your <strong>aha-experience</strong> was.</li>" +
-        "This describes the positive 'click' you sometimes experience, when the pieces of the 'puzzle' fall together and you 'understand' the image.</li>" +
-        "<li>Finally, we will ask you how satisfied you are with the solution</li></ul>Don't worry if this list seems overwhelming, you will be guided through the whole process with reminders.</p>" +
-        "<p>Press any key to begin the experiment.</p></div>",
-      post_trial_gap: 1000,
+      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Start part 2</h3>" +
+        "<p>You will see a serious of black and white images. Please pay close attention to the objects in the images because you'll need to remember them afterwards. You do not need to respond to the images, just passively look at them.</p>" +
+        "<p>Press any key to start the second part of the experiment.</p></div>",
+      post_trial_gap: 0,
       data: {
         test_part: 'instructions'
       }
     };
     timeline.push(instructions2);
 
-    /* phase 1 */
-
-    var fixation = {
-      type: 'html-keyboard-response',
-      stimulus: '<div style="font-size:60px;">+</div>',
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 500,
-      data: {
-        test_part: 'fixation'
-      }
+  var fixation = {
+    type: 'html-keyboard-response',
+    stimulus: '<div style="font-size:60px;">+</div>',
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 200,
+    data: {
+      test_part: 'fixation'
     }
+  }
 
-    var mooney1 = {
-      type: 'image-keyboard-response',
-      stimulus: jsPsych.timelineVariable('mooney'),
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 900,
-      data: {
-        test_part: 'mooney1'
-      }
-    };
-
-    post_mooney_questions = {
-      type: 'survey-likert',
-      questions: [{
-        prompt: "<p>How confident are you that you already know now what is in the picture?</p>",
-        labels: ['I have no clue at all', '', '', '', '', '', '', '', 'I know with very high certainty'],
-        required: true
-      }, {
-        prompt: "<p>How likely is it that you would solve (identify what's in it) this image <strong>when given unlimited time?</strong></p>",
-        labels: ["That's very unlikely", '', '', '', '', '', '', '', "That's very likely"],
-        required: true
-      }, {
-        prompt: "<p>How <strong>curious</strong> are you about the solution of this image?</p>",
-        labels: ['indifferent', '', '', '', '', '', '', '', 'Very curious'],
-        required: true
-      }],
-      data: {
-        test_part: 'post_mooney1_questions'
-      }
-    };
-
-
-    var mooney2 = {
-      type: 'image-keyboard-response',
-      stimulus: jsPsych.timelineVariable('mooney'),
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 2000,
-      data: {
-        test_part: 'mooney2'
-      }
-    };
-
-    var solved = {
-      type: 'survey-text',
-      data: jsPsych.timelineVariable('correct_resp'),
-      questions: [{
-        prompt: 'Did you see what was actually depicted in the image? If so, use just <strong>one or two words</strong> (not more!) to describe it. If not, just leave blank and click continue. Note that it is ok to name just the basic level category, e.g. when you see a parrot in the image, "parrot" will obviously be a correct answer but also also "bird". However, "animal" will <strong>not</strong> be counted as a correct response. You do not need to describe the image in full, just name the main object in it.',
-        rows: 1,
-        columns: 40
-      }],
-      data: {
-        test_part: 'recognition'
-      }
-    };
-
-    var solution = {
-      type: 'animate-transparency',
-      stimuli: function () {
-        return [jsPsych.timelineVariable('mooney')(), jsPsych.timelineVariable('solution')()];
-      },
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 3500,
-      data: {
-        test_part: 'reveal'
-      }
-    };
-
-    var mooney3 = {
-      type: 'image-keyboard-response',
-      stimulus: jsPsych.timelineVariable('mooney'),
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 500,
-      data: {
-        test_part: 'mooney3'
-      }
-    };
-
-
-    post_reveal_questions = {
-      type: 'survey-likert',
-      questions: [{
-        prompt: "<p>How strong was your <strong>aha-experience</strong> when seeing the solution?</p>",
-        labels: ['Practically absent', '', '', '', '', '', '', '', 'Very intense'],
-        required: true
-      }, {
-        prompt: "<p>How <strong>(dis)satisfied</strong> were you with the solution?</p>",
-        labels: ['Very dissatisfied', '', '', '', '', '', '', '', 'Very satisfied'],
-        required: true
-      }],
-      data: {
-        test_part: 'post_reveal_questions'
-      }
-    };
-
-
-    var phase1_procedure = {
-      timeline: [fixation, mooney1, post_mooney_questions, mooney2, solved,
-        solution, mooney3, post_reveal_questions
-      ],
-      timeline_variables: ph1_stimlist,
-      repetitions: 1,
-      randomize_order: true
-    };
-
-    timeline.push(phase1_procedure);
-
-    /* phase 2 below */
-
-    var ph2_instruct = {
-      type: "html-keyboard-response",
-      stimulus: "<p>You completed the first phase of the experiment.</p>" +
-        "<p>In the next phase you will again see a series of distorted images, some of which you have already encountered in the previous phase.</p>" +
-        "<p>You will be asked to recognize what is depicted if you can and subsequently indicate whether the image was an old or a new one (one not seen in the previous phase.</p>" +
-        "<p>Press any key to start the new phase</p>",
-      data: {
-        test_part: 'instructions'
-      }
-    };
-    timeline.push(ph2_instruct);
-
-
-
-    var ph2_fixation = {
-      type: 'html-keyboard-response',
-      stimulus: '<div style="font-size:60px;">+</div>',
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 500,
-      data: {
-        test_part: 'fixation'
-      }
+  var reveal = {
+    type: 'animate-transparency',
+    stimuli: function () {
+      return [jsPsych.timelineVariable('mooney')(), jsPsych.timelineVariable('solution')()];
+    },
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 4000,
+    orientation: condition,
+    data: {
+      test_part: 'reveal',
     }
+  };
 
-
-    var ph2_mooney = {
-      type: 'image-keyboard-response',
-      stimulus: jsPsych.timelineVariable('mooney'),
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 2000,
-      data: {
-        test_part: 'ph2_mooney'
-      }
-    };
-
-
-    var ph2_oldornew = {
-      type: 'html-keyboard-response',
-      stimulus: '<p></p>',
-      choices: ['y', 'n'],
-      prompt: "<p>Did you see this image before, yes or no? <b>Press y or n</b>.</p>",
-      data: {
-        test_part: 'familiar'
-      },
-      data: jsPsych.timelineVariable('data'),
-      on_finish: function (data) {
-        data.correct = data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.old);
-      }
-    };
-
-
-    var ph2_solved = {
-      type: 'survey-text',
-      questions: [{
-        prompt: 'Did you see what was actually depicted in the image? If so, use just <strong>one or two words</strong> (not more!) to describe it. If not, just leave blank and click continue. Note that it is ok to name just the basic level category, e.g. when you see a parrot in the image, "parrot" will obviously be a correct answer but also also "bird". However, "animal" will <strong>not</strong> be counted as a correct response. You do not need to describe the image in full, just name the main object in it.',
-        rows: 1,
-        columns: 40
-      }],
-      data: {
-        test_part: 'ph2_recognition'
-      }
-    };
-
-
-    var phase2_procedure = {
-      timeline: [ph2_fixation, ph2_mooney, ph2_oldornew, ph2_solved],
-      timeline_variables: stimlist,
-      repetitions: 1,
-      randomize_order: true
+  var mooney = {
+    type: 'image-keyboard-response',
+    stimulus: jsPsych.timelineVariable('mooney'),
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 500,
+    orientation: condition,
+    data: {
+      test_part: 'mooney',
     }
-    timeline.push(phase2_procedure);
+  };
 
-    qitems = ["I view challenging situations as an opportunity to grow and learn.",
-      "I am always looking for experiences that challenge how I think about myself and the world.",
-      "I seek out situations where it is likely that I will have to think in depth about something.",
-      "I enjoy learning about subjects that are unfamiliar to me.",
-      "I find it fascinating to learn new information.",
-      "Thinking about solutions to difficult conceptual problems can keep me awake at night.",
-      "I can spend hours on a single problem because I just can't rest without knowing the answer.",
-      "I feel frustrated if I can't figure out the solution to a problem, so I work even harder to solve it.",
-      "I work relentlessly at problems that I feel must be solved.",
-      "It frustrates me not having all the information I need.",
-      "The smallest doubt can stop me from seeking out new experiences.",
-      "I cannot handle the stress that comes from entering uncertain situations.",
-      "I find it hard to explore new places when I lack confidence in my abilities.",
-      "I cannot function well if I am unsure whether a new experience is safe.",
-      "It is difficult to concentrate when there is a possibility that I will be taken by surprise.",
-      "I like to learn about the habits of others.",
-      "I like finding out why people behave the way they do.",
-      "When other people are having a conversation, I like to find out what it's about.",
-      "When around other people, I like listening to their conversations.",
-      "When people quarrel, I like to know what's going on.",
-      "The anxiety of doing something new makes me feel excited and alive.",
-      "Risk-taking is exciting to me.",
-      "When I have free time, I want to do things that are a little scary.",
-      "Creating an adventure as I go is much more appealing than a planned adventure.",
-      "I prefer friends who are excitingly unpredictable.",
-      "I like exploring my surroundings.",
-      "When I smell something new, I try and find out what the odor is coming from.",
-      "I like to discover new places to go.",
-      "If I hear something rustling in the grass I have to see what it is.",
-      "I like visiting art galleries and art museums.",
-      "When I see a new fabric, I like to touch and feel it.",
-      "I like to listen to new and unusual kinds of music.",
-      "When I hear a musical instrument and I am not sure what it is, I like to see it.",
-      "I enjoy trying different kinds of ethnic foods.",
-      "When I hear a strange sound, I usually try to find out what caused it."
-    ];
 
-    shuffleArray(qitems);
-    formattedqitems = []
+  var phase2_procedure = {
+    timeline: [fixation, reveal, mooney],
+    timeline_variables: stimlist,
+    repetitions: 1,
+    randomize_order: true
+  };
 
-    for (let i = 0; i < qitems.length; i++) {
-      formattedqitems.push({
-        prompt: qitems[i],
-        labels: ['Almost Never', 'Sometimes', 'Often', 'Almost Always'],
-        required: true
-      })
+  timeline.push(phase2_procedure);
+
+  /* phase 3 below */
+
+
+  var posttest = {
+    type: 'survey-text',
+    questions: [{
+      prompt: "<div style='word-wrap: break-word; width: 900px'><h3>Part 3: Memory</h3><p>Contrary to what we said earlier, we now want you to try to <strong>remember as many words as possible from the emotion questionnaire</strong> you completed in the beginning of the experiment. So we are <strong>not</strong> interested in whether you remember the images you just saw, only in the emotion words you can still remember from the first part. Please list them below, separated by comma's</p></div>",
+      rows: 5,
+      columns: 50
+    }],
+    data: {
+      test_part: 'posttest'
     }
+  };
 
+   timeline.push(posttest);
 
-    var curiosity_questionnaire = {
-      type: 'survey-likert',
-      preamble: "<h3>Questionnaire</h3><p>This is the last step of the experiment. A number of statements that people use to describe themselves are given below.  Read each statement and indicate how you generally feel using the options below.  There are no right or wrong answers.  Do not spend too much time on any one statement but give the answer that seems to describe how you <strong>generally</strong> feel.</p>",
-      data: {
-        test_part: 'curiosity_questionnaire'
-      }
-    };
+  /* define debrief */
 
-    timeline.push(curiosity_questionnaire);
+  var debrief = {
+    type: "html-keyboard-response",
+    stimulus: "<div style='word-wrap: break-word; width: 900px'><h1>Thank you!</h1><p>You completed the experiment. As you noticed we were interested in incidental (non-intentional) learning (not in your memory for images), and in how it is affected by in-between intentional learning of different materials. Apologies for misleading you.</p>" +
+      "<p>Press any key to return to...</p></div>",
+    data: {
+      test_part: 'instructions'
+    }
+  };
+  timeline.push(debrief);
 
-    /* define debrief */
-
-    var debrief = {
-      type: "html-keyboard-response",
-      stimulus: "<h1>Thank you!</h1><p>You finished the complete experiment.</p>" +
-        "<p>Press any key to return to...</p>",
-      data: {
-        test_part: 'instructions'
-      }
-    };
-    timeline.push(debrief);
-
-    /* start the experiment */
-    jsPsych.init({
-      timeline: timeline,
-      show_progress_bar: true,
-      preload_images: images,
-      exclusions: {
-        min_width: 800,
-        min_height: 600
-      },
-      on_finish: function () {
-        jsPsych.data.addProperties({
-          totalTime: jsPsych.totalTime()
-        });
-        saveData("curimoon.csv", jsPsych.data.get().csv());
-      }
-    });
+  /* start the experiment */
+  jsPsych.init({
+    timeline: timeline,
+    show_progress_bar: true,
+    preload_images: images,
+    exclusions: {
+      min_width: 800,
+      min_height: 600
+    },
+    on_finish: function () {
+      jsPsych.data.addProperties({
+        totalTime: jsPsych.totalTime()
+      });
+      saveData("curimoon.csv", jsPsych.data.get().csv());
+      window.location=finishurl
+    }
+  });
   }
 </script>
 
