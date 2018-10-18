@@ -78,14 +78,21 @@
     }
   }
 
+  function getRandomIntInclusive(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+  }
+
 
   var experiment_name = 'mooneymood'
   var subject_id = getParameterByName('PROLIFIC_PID');
   // how many stimuli per session?
   var nb_stim_per_session = 30;
+  var conditions = [0,180]
   var condition = 0; //if 0: upright mooneys 
   var stimlist = [];
-  var finishurl= "www.google.be";
+  var finishurl = "http://www.google.be";
 
   var images = ["img/018tt.jpg", "img/018gs.jpg"] // the list of images to preload
 
@@ -114,13 +121,11 @@
   function runExp() {
 
     // randomly assign half of subjects to condition with inverted mooneys (ori 180)
-    number = subject_id.match(/\d+/g).map(Number)[0];
-    if (number % 2 == 0) {
-      condition = 180
-    }
+    
+    condition = conditions[Math.floor(Math.random()*conditions.length)];
 
     // panas items
-     qitems = ["Interested", "Distressed", "Excited", "Upset", "Strong", "Guilty", "Scared", "Hostile", "Enthusiastic",
+    qitems = ["Interested", "Distressed", "Excited", "Upset", "Strong", "Guilty", "Scared", "Hostile", "Enthusiastic",
       "Proud", "Irritable", "Alert", "Ashamed", "Inspired", "Nervous", "Determined", "Attentive", "Jittery", "Active",
       "Afraid"
     ];
@@ -143,7 +148,6 @@
     jsPsych.data.addProperties({
       subject: subject_id,
       condition: condition,
-      panasitemorder: qitems.toString(),
       experiment_name: experiment_name
     });
 
@@ -198,21 +202,22 @@
     /* phase 1 */
 
 
-  var panas_questionnaire = {
-    type: 'survey-likert',
-    preamble: "<div style='word-wrap: break-word; width: 900px'><h3>Part 1: Questionnaire</h3><p>This scale consists of a number of words that describe different feelings and emotions. Read each item and indicate the extent you have felt this way <strong>over the past week</strong></p></div>",
-    questions: formattedqitems,
-    data: {
-      test_part: 'panas_questionnaire'
-    }
-  };
+    var panas_questionnaire = {
+      type: 'survey-likert',
+      preamble: "<div style='word-wrap: break-word; width: 900px'><h3>Part 1: Questionnaire</h3><p>This scale consists of a number of words that describe different feelings and emotions. Read each item and indicate the extent you have felt this way <strong>over the past week</strong></p></div>",
+      questions: formattedqitems,
+      data: {
+        test_part: 'panas_questionnaire',
+        order: qitems.toString()
+      }
+    };
 
-  timeline.push(panas_questionnaire);
+    timeline.push(panas_questionnaire);
 
-  /* phase 2 */
+    /* phase 2 */
 
-  /* define instructions trial */
-  var instructions2 = {
+    /* define instructions trial */
+    var instructions2 = {
       type: "html-keyboard-response",
       stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Start part 2</h3>" +
         "<p>You will see a serious of black and white images. Please pay close attention to the objects in the images because you'll need to remember them afterwards. You do not need to respond to the images, just passively look at them.</p>" +
@@ -224,96 +229,96 @@
     };
     timeline.push(instructions2);
 
-  var fixation = {
-    type: 'html-keyboard-response',
-    stimulus: '<div style="font-size:60px;">+</div>',
-    choices: jsPsych.NO_KEYS,
-    trial_duration: 200,
-    data: {
-      test_part: 'fixation'
+    var fixation = {
+      type: 'html-keyboard-response',
+      stimulus: '<div style="font-size:60px;">+</div>',
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 200,
+      data: {
+        test_part: 'fixation'
+      }
     }
-  }
 
-  var reveal = {
-    type: 'animate-transparency',
-    stimuli: function () {
-      return [jsPsych.timelineVariable('mooney')(), jsPsych.timelineVariable('solution')()];
-    },
-    choices: jsPsych.NO_KEYS,
-    trial_duration: 4000,
-    orientation: condition,
-    data: {
-      test_part: 'reveal',
-    }
-  };
+    var reveal = {
+      type: 'animate-transparency',
+      stimuli: function () {
+        return [jsPsych.timelineVariable('mooney')(), jsPsych.timelineVariable('solution')()];
+      },
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 4000,
+      orientation: condition,
+      data: {
+        test_part: 'reveal',
+      }
+    };
 
-  var mooney = {
-    type: 'image-keyboard-response',
-    stimulus: jsPsych.timelineVariable('mooney'),
-    choices: jsPsych.NO_KEYS,
-    trial_duration: 500,
-    orientation: condition,
-    data: {
-      test_part: 'mooney',
-    }
-  };
-
-
-  var phase2_procedure = {
-    timeline: [fixation, reveal, mooney],
-    timeline_variables: stimlist,
-    repetitions: 1,
-    randomize_order: true
-  };
-
-  timeline.push(phase2_procedure);
-
-  /* phase 3 below */
+    var mooney = {
+      type: 'image-keyboard-response',
+      stimulus: jsPsych.timelineVariable('mooney'),
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 500,
+      orientation: condition,
+      data: {
+        test_part: 'mooney',
+      }
+    };
 
 
-  var posttest = {
-    type: 'survey-text',
-    questions: [{
-      prompt: "<div style='word-wrap: break-word; width: 900px'><h3>Part 3: Memory</h3><p>Contrary to what we said earlier, we now want you to try to <strong>remember as many words as possible from the emotion questionnaire</strong> you completed in the beginning of the experiment. So we are <strong>not</strong> interested in whether you remember the images you just saw, only in the emotion words you can still remember from the first part. Please list them below, separated by comma's</p></div>",
-      rows: 5,
-      columns: 50
-    }],
-    data: {
-      test_part: 'posttest'
-    }
-  };
+    var phase2_procedure = {
+      timeline: [fixation, reveal, mooney],
+      timeline_variables: stimlist,
+      repetitions: 1,
+      randomize_order: true
+    };
 
-   timeline.push(posttest);
+    timeline.push(phase2_procedure);
 
-  /* define debrief */
+    /* phase 3 below */
 
-  var debrief = {
-    type: "html-keyboard-response",
-    stimulus: "<div style='word-wrap: break-word; width: 900px'><h1>Thank you!</h1><p>You completed the experiment. As you noticed we were interested in incidental (non-intentional) learning (not in your memory for images), and in how it is affected by in-between intentional learning of different materials. Apologies for misleading you.</p>" +
-      "<p>Press any key to return to...</p></div>",
-    data: {
-      test_part: 'instructions'
-    }
-  };
-  timeline.push(debrief);
 
-  /* start the experiment */
-  jsPsych.init({
-    timeline: timeline,
-    show_progress_bar: true,
-    preload_images: images,
-    exclusions: {
-      min_width: 800,
-      min_height: 600
-    },
-    on_finish: function () {
-      jsPsych.data.addProperties({
-        totalTime: jsPsych.totalTime()
-      });
-      saveData("curimoon.csv", jsPsych.data.get().csv());
-      window.location=finishurl
-    }
-  });
+    var posttest = {
+      type: 'survey-text',
+      questions: [{
+        prompt: "<div style='word-wrap: break-word; width: 900px'><h3>Part 3: Memory</h3><p>Contrary to what we said earlier, we now want you to try to <strong>remember as many words as possible from the emotion questionnaire</strong> you completed in the beginning of the experiment. So we are <strong>not</strong> interested in whether you remember the images you just saw, only in the emotion words you can still remember from the first part. Please list them below, separated by comma's</p></div>",
+        rows: 5,
+        columns: 50
+      }],
+      data: {
+        test_part: 'posttest'
+      }
+    };
+
+    timeline.push(posttest);
+
+    /* define debrief */
+
+    var debrief = {
+      type: "html-keyboard-response",
+      stimulus: "<div style='word-wrap: break-word; width: 900px'><h1>Thank you!</h1><p>You completed the experiment. As you noticed we were interested in incidental (non-intentional) learning (not in your memory for images), and in how it is affected by in-between intentional learning of different materials. Apologies for misleading you.</p>" +
+        "<p>Press any key to return to...</p></div>",
+      data: {
+        test_part: 'instructions'
+      }
+    };
+    timeline.push(debrief);
+
+    /* start the experiment */
+    jsPsych.init({
+      timeline: timeline,
+      show_progress_bar: true,
+      preload_images: images,
+      exclusions: {
+        min_width: 800,
+        min_height: 600
+      },
+      on_finish: function () {
+        jsPsych.data.addProperties({
+          totalTime: jsPsych.totalTime()
+        });
+        saveData("curimoon.csv", jsPsych.data.get().csv());
+        window.location = finishurl
+      }
+    });
   }
 </script>
 
