@@ -92,7 +92,7 @@
   var conditions = [0,180]
   var condition = 0; //if 0: upright mooneys 
   var stimlist = [];
-  var finishurl = "http://www.google.be";
+  var completionurl = "https://app.prolific.ac/submissions/complete?cc=AU20BNPC";
 
   var images = ["img/018tt.jpg", "img/018gs.jpg"] // the list of images to preload
 
@@ -279,7 +279,7 @@
     var posttest = {
       type: 'survey-text',
       questions: [{
-        prompt: "<div style='word-wrap: break-word; width: 900px'><h3>Part 3: Memory</h3><p>Contrary to what we said earlier, we now want you to try to <strong>remember as many words as possible from the emotion questionnaire</strong> you completed in the beginning of the experiment. So we are <strong>not</strong> interested in whether you remember the images you just saw, only in the emotion words you can still remember from the first part. Please list them below, separated by comma's</p></div>",
+        prompt: "<div style='word-wrap: break-word; width: 900px'><h3>Part 3: Memory</h3><p>Contrary to what we said earlier, we now want you to try to <strong>remember as many words as possible from the emotion questionnaire</strong> you completed in the beginning of the experiment. So we are <strong>not</strong> interested in whether you remember the images you just saw, only in the <strong>emotion words</strong> you can still remember from the <strong>first part</strong>. Please take a few minutes to think back on the first part and list the words below, separated by comma's.</p></div>",
         rows: 5,
         columns: 50
       }],
@@ -295,7 +295,7 @@
     var debrief = {
       type: "html-keyboard-response",
       stimulus: "<div style='word-wrap: break-word; width: 900px'><h1>Thank you!</h1><p>You completed the experiment. As you noticed we were interested in incidental (non-intentional) learning (not in your memory for images), and in how it is affected by in-between intentional learning of different materials. Apologies for misleading you.</p>" +
-        "<p>Press any key to return to...</p></div>",
+        "<p>Press any key to return to Prolific and confirm completion...</p></div>",
       data: {
         test_part: 'instructions'
       }
@@ -316,7 +316,7 @@
           totalTime: jsPsych.totalTime()
         });
         saveData("curimoon.csv", jsPsych.data.get().csv());
-        window.location = finishurl
+        window.location = completionurl
       }
     });
   }
