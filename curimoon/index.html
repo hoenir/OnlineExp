@@ -58,6 +58,8 @@
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         console.log(xhr.response);
+        window.location = completionurl
+
       }
     }
     xhr.open('POST', 'https://www.psytests.be/tests/curimoon/curimoon.php');
@@ -316,7 +318,6 @@
           totalTime: jsPsych.totalTime()
         });
         saveData("curimoon.csv", jsPsych.data.get().csv());
-        window.location = completionurl
       }
     });
   }
