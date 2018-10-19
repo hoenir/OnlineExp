@@ -28,6 +28,17 @@
   </noscript>
 </body>
 <script>
+  var experiment_name = 'mooneymood'
+  var subject_id = getParameterByName('PROLIFIC_PID');
+  // how many stimuli per session?
+  var nb_stim_per_session = 30;
+  var conditions = [0,180]
+  var condition = 0; //if 0: upright mooneys 
+  var stimlist = [];
+  var completionurl = "https://app.prolific.ac/submissions/complete?cc=AU20BNPC";
+  var images = ["img/018tt.jpg", "img/018gs.jpg"] // the list of images to preload
+
+
   // returns param value from url if name/key given
   function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -58,7 +69,7 @@
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         console.log(xhr.response);
-        window.location = completionurl
+        //window.location = completionurl
 
       }
     }
@@ -86,17 +97,6 @@
     return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
   }
 
-
-  var experiment_name = 'mooneymood'
-  var subject_id = getParameterByName('PROLIFIC_PID');
-  // how many stimuli per session?
-  var nb_stim_per_session = 30;
-  var conditions = [0,180]
-  var condition = 0; //if 0: upright mooneys 
-  var stimlist = [];
-  var completionurl = "https://app.prolific.ac/submissions/complete?cc=AU20BNPC";
-
-  var images = ["img/018tt.jpg", "img/018gs.jpg"] // the list of images to preload
 
   loadJSON('stimset.json', function (response) {
     createstimlists(response);
