@@ -93,9 +93,9 @@ jsPsych.plugins['survey-text'] = (function() {
       html += '<p class="jspsych-survey-text">' + trial.questions[i].prompt + '</p>';
       var autofocus = i == 0 ? "autofocus" : "";
       if(trial.questions[i].rows == 1){
-        html += '<input type="text" name="#jspsych-survey-text-response-' + i + '" size="'+trial.questions[i].columns+'" value="'+trial.questions[i].value+'" '+autofocus+'></input>';
+        html += '<input type="text" name="#jspsych-survey-text-response-' + i + '" size="'+trial.questions[i].columns+'" value="'+trial.questions[i].value+'" autofocus=' +autofocus+'></input>';
       } else {
-        html += '<textarea name="#jspsych-survey-text-response-' + i + '" cols="' + trial.questions[i].columns + '" rows="' + trial.questions[i].rows + '" '+autofocus+'>'+trial.questions[i].value+'</textarea>';
+        html += '<textarea name="#jspsych-survey-text-response-' + i + '" cols="' + trial.questions[i].columns + '" rows="' + trial.questions[i].rows + '" autofocus='+autofocus+'>'+trial.questions[i].value+'</textarea>';
       }
       html += '</div>';
     }
@@ -104,6 +104,7 @@ jsPsych.plugins['survey-text'] = (function() {
     html += '<button id="jspsych-survey-text-next" class="jspsych-btn jspsych-survey-text">'+trial.button_label+'</button>';
 
     display_element.innerHTML = html;
+
 
     display_element.querySelector('#jspsych-survey-text-next').addEventListener('click', function() {
       // measure response time

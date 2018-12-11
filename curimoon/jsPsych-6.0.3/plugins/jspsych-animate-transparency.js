@@ -46,69 +46,120 @@ jsPsych.plugins["animate-transparency"] = (function () {
                 pretty_name: 'Prompt',
                 default: null,
                 description: 'Any content here will be displayed below stimulus.'
-            }
+            },
+            delay: {
+                type: jsPsych.plugins.parameterType.INT,
+                pretty_name: 'Time before animation starts (ms)',
+                default: 200,
+                description: 'Time before animation starts'
+            },
+            response_ends_trial: {
+                type: jsPsych.plugins.parameterType.BOOL,
+                pretty_name: 'Response ends trial',
+                default: true,
+                description: 'If true, trial will end when subject makes a response.'
+            },
         }
     }
 
     plugin.trial = function (display_element, trial) {
 
-        var startTime = (new Date()).getTime();
-        var responses = [];
+        currentOpacity = 0 // starting value
+
+
 
         var css = document.createElement("style");
         css.type = "text/css";
-        css.innerHTML = "@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;}}"  +
-        "#topstim { opacity:0; animation: fadeIn " + trial.trial_duration/1000 + "s ease .2s forwards;}" +
-        "#bottomstim {-webkit-transform: rotate("+ String(trial.orientation) + "deg);" +
-        "-moz-transform: rotate(" + String(trial.orientation) + "deg);" +
-        "-ms-transform: rotate("+ String(trial.orientation) + "deg);" +
-        "-o-transform: rotate("+ String(trial.orientation) + "deg);" +
-        "transform: rotate("+ String(trial.orientation) + "deg);}";
+        css.innerHTML = "#reveal { background:url(" + trial.stimuli[1] + ") no-repeat center; height:700px; left:-10px; position:absolute; top:-10px; width:700px;" +
+            "opacity:0; animation: fadeIn " + (trial.trial_duration - trial.delay) / 1000 + "s ease " + trial.delay / 1000 + "s forwards; border: 10px solid black;}" +
+            "#mooney { background:url(" + trial.stimuli[0] + ") no-repeat center; height:700px; position:relative; /* and this has to be relative */" +
+            "width:700px;border: 10px solid black;} @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;}}"
+
 
 
         document.body.appendChild(css);
-        
-        display_element.innerHTML =  '<div id="container" style="position:relative;">' +
-        '<img style="position: absolute;top: 0;left: 0;z-index: -1;" id="bottomstim" src="' + trial.stimuli[0] + 
-        '"><img style="position:relative; z-index:1" id="topstim" src="'+ trial.stimuli[1] +'"></div>';
-        
-        if (trial.prompt !== null) {
+
+        display_element.innerHTML = '<div id="mooney"><div id="reveal"></div></div>'
+
+        // add prompt
+        if (trial.prompt !== null){
             display_element.innerHTML += trial.prompt;
-        }       
+        }
+  
 
+        // store response
+        var response = {
+            rt: null,
+            key: null
+        };
+
+        // function to end trial when it is time
+        var end_trial = function () {
+
+            // kill any remaining setTimeout handlers
+            jsPsych.pluginAPI.clearAllTimeouts();
+
+            // kill keyboard listeners
+            if (typeof keyboardListener !== 'undefined') {
+                jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
+            }
+
+            // gather the data to store for the trial
+            var trial_data = {
+                "rt": response.rt,
+                "stimulus": trial.stimulus,
+                "key_press": response.key,
+                "opacity": currentOpacity
+            };
+
+            // clear the display
+            display_element.innerHTML = '';
+
+            // move on to the next trial
+            jsPsych.finishTrial(trial_data);
+        };
+
+        // function to handle responses by the subject
         var after_response = function (info) {
-
-            responses.push({
-                key_press: info.key,
-                rt: info.rt,
-                stimuli: trial.stimuli
-            });
 
             // after a valid response, the stimulus will have the CSS class 'responded'
             // which can be used to provide visual feedback that a response was recorded
-            display_element.querySelector('#jspsych-animate-transparency-from-image').className += ' responded';
+            //display_element.querySelector('#jspsych-image-keyboard-response-stimulus').className += ' responded';
+
+            // only record the first response
+            if (response.key == null) {
+                response = info;
+            }
+
+            // get last opacity value
+            var reveal = document.getElementById("reveal");
+            var mooney = document.getElementById("mooney");
+            var currentOpacity = window.getComputedStyle(reveal).getPropertyValue("opacity");
+            console.log(currentOpacity);
+            reveal.style.border = "10px solid green";
+            mooney.style.border = "10px solid green";
+
+            if (trial.response_ends_trial) {
+                end_trial();
+            }
+        };
+
+        // start the response listener
+        if (trial.choices != jsPsych.NO_KEYS) {
+            var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
+                callback_function: after_response,
+                valid_responses: trial.choices,
+                rt_method: 'date',
+                persist: false,
+                allow_held_key: false
+            });
         }
 
-        // hold the jspsych response listener object in memory
-        // so that we can turn off the response collection when
-        // the trial ends
-        var response_listener = jsPsych.pluginAPI.getKeyboardResponse({
-            callback_function: after_response,
-            valid_responses: trial.choices,
-            rt_method: 'date',
-            persist: true,
-            allow_held_key: false
-        });
-
-        function end_trial() {
-
-            jsPsych.pluginAPI.cancelKeyboardResponse(response_listener);
-
-            var trial_data = {
-                "responses": JSON.stringify(responses)
-            };
-
-            jsPsych.finishTrial(trial_data);
+        // hide stimulus if stimulus_duration is set
+        if (trial.stimulus_duration !== null) {
+            jsPsych.pluginAPI.setTimeout(function () {
+                display_element.querySelector('#jspsych-image-keyboard-response-stimulus').style.visibility = 'hidden';
+            }, trial.stimulus_duration);
         }
 
         // end trial if trial_duration is set
@@ -117,6 +168,7 @@ jsPsych.plugins["animate-transparency"] = (function () {
                 end_trial();
             }, trial.trial_duration);
         }
+
     };
 
     return plugin;
