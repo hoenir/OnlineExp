@@ -31,7 +31,7 @@
   var experiment_name = 'norming'
   var subject_id = getParameterByName('PROLIFIC_PID');
   // how many stimuli per session?
-  var nb_stim_per_session = 5;
+  var nb_stim_per_session = 15;
   // prop of stimuli for phase 1
 
   var stimlist = [];
@@ -275,7 +275,7 @@
         test_part: 'post_reveal_questions'
       },
       on_finish: function () {
-        jsPsych.setProgressBar(jsPsych.data.get().last(1).select('trial_index').mean() / 5+(nb_stim_per_session*7));
+        jsPsych.setProgressBar(jsPsych.data.get().last(1).select('trial_index').mean() / (5+(nb_stim_per_session*7)));
       }
     };
 
@@ -307,9 +307,6 @@
       timeline: timeline,
       show_progress_bar: true,
       auto_update_progress_bar: false,
-      on_data_update: function(data) {
-    console.log('Just added new data. The contents of the data are: '+JSON.stringify(data));
-  },
       preload_images: images,
       exclusions: {
         min_width: 800,

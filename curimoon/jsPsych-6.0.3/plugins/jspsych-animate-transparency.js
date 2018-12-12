@@ -135,7 +135,7 @@ jsPsych.plugins["animate-transparency"] = (function () {
             var reveal = document.getElementById("reveal");
             var mooney = document.getElementById("mooney");
             currentOpacity = window.getComputedStyle(reveal).getPropertyValue("opacity");
-            console.log(currentOpacity);
+            //console.log(currentOpacity);
             reveal.style.border = "10px solid green";
             mooney.style.border = "10px solid green";
 
