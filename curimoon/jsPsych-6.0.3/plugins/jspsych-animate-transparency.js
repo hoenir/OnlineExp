@@ -107,9 +107,9 @@ jsPsych.plugins["animate-transparency"] = (function () {
             // gather the data to store for the trial
             var trial_data = {
                 "rt": response.rt,
-                "stimulus": trial.stimulus,
+                "stimulus": trial.stimuli[0],
                 "key_press": response.key,
-                "opacity": currentOpacity
+                "opacity": parseFloat(currentOpacity)
             };
 
             // clear the display
@@ -134,7 +134,7 @@ jsPsych.plugins["animate-transparency"] = (function () {
             // get last opacity value
             var reveal = document.getElementById("reveal");
             var mooney = document.getElementById("mooney");
-            currentOpacity = window.getComputedStyle(reveal).getPropertyValue("opacity")*100;
+            currentOpacity = window.getComputedStyle(reveal).getPropertyValue("opacity");
             console.log(currentOpacity);
             reveal.style.border = "10px solid green";
             mooney.style.border = "10px solid green";
@@ -155,12 +155,6 @@ jsPsych.plugins["animate-transparency"] = (function () {
             });
         }
 
-        // hide stimulus if stimulus_duration is set
-        if (trial.stimulus_duration !== null) {
-            jsPsych.pluginAPI.setTimeout(function () {
-                display_element.querySelector('#jspsych-image-keyboard-response-stimulus').style.visibility = 'hidden';
-            }, trial.stimulus_duration);
-        }
 
         // end trial if trial_duration is set
         if (trial.trial_duration !== null) {

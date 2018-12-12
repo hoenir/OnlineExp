@@ -307,6 +307,9 @@
       timeline: timeline,
       show_progress_bar: true,
       auto_update_progress_bar: false,
+      on_data_update: function(data) {
+    console.log('Just added new data. The contents of the data are: '+JSON.stringify(data));
+  },
       preload_images: images,
       exclusions: {
         min_width: 800,
