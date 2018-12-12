@@ -71,7 +71,7 @@ jsPsych.plugins["animate-transparency"] = (function () {
         var css = document.createElement("style");
         css.type = "text/css";
         css.innerHTML = "#reveal { background:url(" + trial.stimuli[1] + ") no-repeat center; height:700px; left:-10px; position:absolute; top:-10px; width:700px;" +
-            "opacity:0; animation: fadeIn " + (trial.trial_duration - trial.delay) / 1000 + "s ease-in " + trial.delay / 1000 + "s forwards; border: 10px solid black;}" +
+            "opacity:0; animation: fadeIn " + (trial.trial_duration - trial.delay) / 1000 + "s ease " + trial.delay / 1000 + "s forwards; border: 10px solid black;}" +
             "#mooney { background:url(" + trial.stimuli[0] + ") no-repeat center; height:700px; position:relative; /* and this has to be relative */" +
             "width:700px;border: 10px solid black;} @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;}}"
 
@@ -134,7 +134,7 @@ jsPsych.plugins["animate-transparency"] = (function () {
             // get last opacity value
             var reveal = document.getElementById("reveal");
             var mooney = document.getElementById("mooney");
-            var currentOpacity = window.getComputedStyle(reveal).getPropertyValue("opacity");
+            var currentOpacity = window.getComputedStyle(reveal).getPropertyValue("opacity")*100;
             console.log(currentOpacity);
             reveal.style.border = "10px solid green";
             mooney.style.border = "10px solid green";
