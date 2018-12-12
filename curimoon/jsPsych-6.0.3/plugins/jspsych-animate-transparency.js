@@ -64,7 +64,7 @@ jsPsych.plugins["animate-transparency"] = (function () {
 
     plugin.trial = function (display_element, trial) {
 
-        currentOpacity = 0 // starting value
+        var currentOpacity = 0 // starting value
 
 
 
@@ -134,7 +134,7 @@ jsPsych.plugins["animate-transparency"] = (function () {
             // get last opacity value
             var reveal = document.getElementById("reveal");
             var mooney = document.getElementById("mooney");
-            var currentOpacity = window.getComputedStyle(reveal).getPropertyValue("opacity")*100;
+            currentOpacity = window.getComputedStyle(reveal).getPropertyValue("opacity")*100;
             console.log(currentOpacity);
             reveal.style.border = "10px solid green";
             mooney.style.border = "10px solid green";

@@ -275,7 +275,7 @@
         test_part: 'post_reveal_questions'
       },
       on_finish: function () {
-        jsPsych.setProgressBar(jsPsych.data.get().last(1).select('trial_index').mean() / 40);
+        jsPsych.setProgressBar(jsPsych.data.get().last(1).select('trial_index').mean() / 5+(nb_stim_per_session*7));
       }
     };
 
