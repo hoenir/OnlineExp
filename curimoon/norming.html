@@ -28,6 +28,17 @@
   </noscript>
 </body>
 <script>
+
+  var experiment_name = 'norming'
+  var subject_id = getParameterByName('PROLIFIC_PID');
+  // how many stimuli per session?
+  var nb_stim_per_session = 5;
+  // prop of stimuli for phase 1
+
+  var stimlist = [];
+  var completionurl = "bye.html";
+  var images = ["img/018tt.jpg", "img/018gs.jpg"] // the list of images to preload
+
   // returns param value from url if name/key given
   function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -58,6 +69,7 @@
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         console.log(xhr.response);
+        window.location = completionurl
       }
     }
     xhr.open('POST', 'https://www.psytests.be/tests/curimoon/curimoon.php');
@@ -77,16 +89,6 @@
       array[j] = temp;
     }
   }
-
-
-  var experiment_name = 'norming'
-  var subject_id = getParameterByName('PROLIFIC_PID');
-  // how many stimuli per session?
-  var nb_stim_per_session = 20;
-  // prop of stimuli for phase 1
-
-  var stimlist = [];
-  var images = ["img/018tt.jpg", "img/018gs.jpg"] // the list of images to preload
 
   loadJSON('stimset.json', function (response) {
     createstimlists(response);
@@ -304,7 +306,7 @@
       preload_images: images,
       exclusions: {
         min_width: 800,
-        min_height: 600
+        min_height: 700
       },
       on_finish: function () {
         jsPsych.data.addProperties({
