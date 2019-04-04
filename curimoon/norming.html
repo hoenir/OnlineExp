@@ -31,7 +31,7 @@
   var experiment_name = 'norming'
   var subject_id = getParameterByName('PROLIFIC_PID');
   // how many stimuli per session?
-  var nb_stim_per_session = 15;
+  var nb_stim_per_session = 1;
   // prop of stimuli for phase 1
 
   var stimlist = [];
@@ -154,18 +154,18 @@
     timeline.push(consent);
 
 
-    timeline.push({
+    /* timeline.push({
       type: 'fullscreen',
       fullscreen_mode: true,
       data: {
         test_part: 'instructions'
       }
-    });
+    }); */
 
     /* define instructions trial */
     var instructions1 = {
       type: "html-keyboard-response",
-      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Instructions</h3><p>This experiment consist of two tasks. In the first task, you will see a series of distorted images like the one below on the left. " +
+      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Instructions</h3><p>In this experiment you will see a series of distorted images like the one below on the left. " +
         "As you can see in the righthand image, the distorted images are derived from actual photographs." +
         "In what follows, you will <strong>briefly</strong> be presented with <strong>only</strong> the distorted image.</p> " +
         "<div style='float: left; margin-right: 20px;'><img src='img/018tt.jpg' height='250' width='250'></img></div>" +
@@ -243,9 +243,9 @@
       stimuli: function () {
         return [jsPsych.timelineVariable('mooney')(), jsPsych.timelineVariable('solution')()];
       },
-      choices: ['space'],
+      choices: ['enter'],
       trial_duration: 8000,
-      prompt: 'Press space as soon as you know what it is!',
+      prompt: 'Press Enter/Return as soon as you know what it is!',
       delay: 400,
       response_ends_trial: false,
       data: {
@@ -289,13 +289,73 @@
 
     timeline.push(trial_procedure);
 
+    qitems = ["I view challenging situations as an opportunity to grow and learn.",
+      "I am always looking for experiences that challenge how I think about myself and the world.",
+      "I seek out situations where it is likely that I will have to think in depth about something.",
+      "I enjoy learning about subjects that are unfamiliar to me.",
+      "I find it fascinating to learn new information.",
+      "Thinking about solutions to difficult conceptual problems can keep me awake at night.",
+      "I can spend hours on a single problem because I just can't rest without knowing the answer.",
+      "I feel frustrated if I can't figure out the solution to a problem, so I work even harder to solve it.",
+      "I work relentlessly at problems that I feel must be solved.",
+      "It frustrates me not having all the information I need.",
+      "The smallest doubt can stop me from seeking out new experiences.",
+      "I cannot handle the stress that comes from entering uncertain situations.",
+      "I find it hard to explore new places when I lack confidence in my abilities.",
+      "I cannot function well if I am unsure whether a new experience is safe.",
+      "It is difficult to concentrate when there is a possibility that I will be taken by surprise.",
+      "I like to learn about the habits of others.",
+      "I like finding out why people behave the way they do.",
+      "When other people are having a conversation, I like to find out what it's about.",
+      "When around other people, I like listening to their conversations.",
+      "When people quarrel, I like to know what's going on.",
+      "The anxiety of doing something new makes me feel excited and alive.",
+      "Risk-taking is exciting to me.",
+      "When I have free time, I want to do things that are a little scary.",
+      "Creating an adventure as I go is much more appealing than a planned adventure.",
+      "I prefer friends who are excitingly unpredictable.",
+      "I like exploring my surroundings.",
+      "When I smell something new, I try and find out what the odor is coming from.",
+      "I like to discover new places to go.",
+      "If I hear something rustling in the grass I have to see what it is.",
+      "I like visiting art galleries and art museums.",
+      "When I see a new fabric, I like to touch and feel it.",
+      "I like to listen to new and unusual kinds of music.",
+      "When I hear a musical instrument and I am not sure what it is, I like to see it.",
+      "I enjoy trying different kinds of ethnic foods.",
+      "When I hear a strange sound, I usually try to find out what caused it."
+    ];
+
+    shuffleArray(qitems);
+    formattedqitems = []
+
+    for (let i = 0; i < qitems.length; i++) {
+      formattedqitems.push({
+        prompt: qitems[i],
+        labels: ['Almost Never', 'Sometimes', 'Often', 'Almost Always'],
+        required: true
+      })
+    }
+
+
+    var curiosity_questionnaire = {
+      type: 'survey-likert',
+      preamble: "<h3>Questionnaire</h3><p>This is the last step of the experiment. A number of statements that people use to describe themselves are given below.  Read each statement and indicate how you generally feel using the options below.  There are no right or wrong answers.  Do not spend too much time on any one statement but give the answer that seems to describe how you <strong>generally</strong> feel.</p>",
+      questions: formattedqitems,
+      data: {
+        test_part: 'curiosity_questionnaire'
+      }
+    };
+
+    timeline.push(curiosity_questionnaire);
 
     /* define debrief */
 
     var debrief = {
       type: "html-keyboard-response",
+      trial_duration: 2000,
       stimulus: "<h1>Thank you!</h1><p>You finished the complete experiment.</p>" +
-        "<p>Press any key to return to...</p>",
+        "<p>You will be returned to Prolific shortly.</p>",
       data: {
         test_part: 'instructions'
       }

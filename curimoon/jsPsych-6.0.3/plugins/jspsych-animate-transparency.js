@@ -64,7 +64,7 @@ jsPsych.plugins["animate-transparency"] = (function () {
 
     plugin.trial = function (display_element, trial) {
 
-        var currentOpacity = 0 // starting value
+        var currentOpacity = -1 // starting value
 
 
 
@@ -73,7 +73,13 @@ jsPsych.plugins["animate-transparency"] = (function () {
         css.innerHTML = "#reveal { background:url(" + trial.stimuli[1] + ") no-repeat center; height:700px; left:-10px; position:absolute; top:-10px; width:700px;" +
             "opacity:0; animation: fadeIn " + (trial.trial_duration - trial.delay) / 1000 + "s ease " + trial.delay / 1000 + "s forwards; border: 10px solid black;}" +
             "#mooney { background:url(" + trial.stimuli[0] + ") no-repeat center; height:700px; position:relative; /* and this has to be relative */" +
-            "width:700px;border: 10px solid black;} @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;}}"
+            "width:700px;border: 10px solid black;" +
+            "-webkit-transform: rotate(" + String(trial.orientation) + "deg);" +
+            "-moz-transform: rotate(" + String(trial.orientation) + "deg);" +
+            "-ms-transform: rotate(" + String(trial.orientation) + "deg);" +
+            "-o-transform: rotate(" + String(trial.orientation) + "deg);" +
+            "transform: rotate(" + String(trial.orientation) + "deg);}" +
+            "@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;}}";
 
 
 

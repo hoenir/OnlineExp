@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My experiment</title>
+  <script src="jsPsych/jspsych.js"></script>
+  <script src="jsPsych/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="jsPsych/plugins/jspsych-html-slider-response.js"></script>
+  <script src="jsPsych/plugins/jspsych-sfm-keyboard-response.js"></script>
+  <script src="jsPsych/plugins/jspsych-html-button-response.js"></script>
+  <script src="jsPsych/plugins/jspsych-pacman.js"></script>
+  <script src="jsPsych/plugins/jspsych-fullscreen.js"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+  <script src="plwCoordsMin6.json" type="text/javascript" charset="utf-8"></script>
+  <link href="jsPsych/css/jspsych.css" rel="stylesheet" type="text/css">
+  </link>
+</head>
+
+<body>
+  <noscript>
+    <h1>Warning: Javascript seems to be disabled</h1>
+    <p>This website requires that Javascript be enabled on your browser.</p>
+    <p>Instructions for enabling Javascript in your browser can be found
+      <a href="http://support.google.com/bin/answer.py?hl=en&answer=23852">here</a>
+      <p>
+  </noscript>
+</body>
+<script>
+  var experiment_name = 'bistapac'
+  var subject_id = getParameterByName('PROLIFIC_PID');
+
+
+  /***********************
+   *	Prepare triallist
+   ***********************/
+  var conditions = []
+  var fig = ['plw', 'sphere'];
+  var threatLevel = [0,1,2]; // no, low, high
+  var sfmLevel = [0, 1, 2];
+  var nbofrepeats = 1;
+
+
+  for (var i = 0; i < fig.length; i++) {
+    for (var j = 0; j < threatLevel.length; j++) {
+      for (var k = 0; k < sfmLevel.length; k++) {
+        conditions.push({
+          fig: fig[i],
+          sfmLevel: sfmLevel[k],
+          respKeys: fig[i] == 'plw' ? ['uparrow', 'downarrow'] : ['leftarrow', 'rightarrow'],
+          threatLevel: threatLevel[j],
+        });
+      }
+    }
+  } 
+
+  var completionurl = "bye.html";
+
+  // returns param value from url if name/key given
+  function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+
+  function loadJSON(filename, callback) {
+
+    var xobj = new XMLHttpRequest();
+    xobj.overrideMimeType("application/json");
+    xobj.open('GET', filename, true);
+    xobj.onreadystatechange = function () {
+      if (xobj.readyState == 4 && xobj.status == "200") {
+        // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+        callback(xobj.responseText);
+      }
+    };
+    xobj.send(null);
+  }
+
+
+  function saveData(name, data) {
+
+    var xhr = new XMLHttpRequest();
+    // Met deze code kan je de respons van de server bekijken in het console venster
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        console.log(xhr.response);
+        window.location = completionurl
+      }
+    }
+    xhr.open('POST', 'https://www.psytests.be/tests/curimoon/curimoon.php');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send("filename=" + name + "&prolific_id=" + JSON.stringify(subject_id) + "&filedata=" + JSON.stringify(data));
+  }
+
+  /**
+   * Randomize array element order in-place.
+   * Using Durstenfeld shuffle algorithm.
+   */
+  function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+  }
+
+  /* loadJSON('stimset.json', function (response) {
+    createstimlists(response);
+    runExp();
+  });
+
+  function createstimlists(response) {
+
+    stimlist = JSON.parse(response);
+    // pick a random subset of images for the subject at the start of the experiment
+    //stimlist = STIMS
+    stimlist = jsPsych.randomization.sampleWithoutReplacement(stimlist, nb_stim_per_session);
+
+    // set old/new variable for determining phase 
+    for (i = 0; i < stimlist.length; i++) {
+      images.push(stimlist[i]['mooney'])
+      images.push(stimlist[i]['solution'])
+
+    }
+
+  } */
+  runExp();
+
+  function runExp() {
+
+    // record extra info in the jsPsych data
+    // this adds a property called 'subject' to every trial
+    jsPsych.data.addProperties({
+      subject: subject_id,
+      experiment_name: experiment_name
+    });
+
+    /* create timeline */
+    var timeline = [];
+
+    /* define welcome message trial */
+    var welcome = {
+      type: "html-keyboard-response",
+      stimulus: "Welcome to the experiment. Press any key to begin.",
+      data: {
+        test_part: 'instructions'
+      }
+    };
+    timeline.push(welcome);
+
+   /*  
+   var consent = {
+      type: "html-button-response",
+      choices: ["I agree"],
+      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Please consider this information carefully before deciding whether to participate in this research</h3>" +
+        "<ul style='text-align: left; font-size: .8em;'><li><b>Purpose of the research</b>: To examine how people process images.</li>" +
+        "<li><b>What you will do in this research</b>:  Stimuli (images) will be presented on the computer and you will be asked different questions about them.</li>" +
+        "<li><b>Time required</b>: Participation will take between 15 and 45 minutes to complete.</li>" +
+        "<li><b>Risks</b>:  There are no anticipated risks associated with participating in this study. The effects of participating should be comparable to those you would experience from viewing a computer monitor for 30 minutes and using a mouse or keyboard.</li>" +
+        "<li><b>Benefits</b>:  This study provides no benefits to you individually except for the monetary reward. The study provides important information about the nature of perception and learning.</li>" +
+        "<li><b>Confidentiality</b>:  Your participation in this study will remain confidential. No personally identifiable information will be associated with your data. Your de-identified data may be shared with other researchers and used in future projects.</li>" +
+        "<li><b>Participation and withdrawal</b>:  Your participation in this study is completely voluntary and you may refuse to participate or you may choose to withdraw at any time without penalty.</li>" +
+        "<li><b>How to contact the researchers</b>: If you have questions or concerns about your participation or payment, or want to request a summary of research findings, please contact Sander Van de Cruys (KU Leuven), at sander.vandecruys@kuleuven.be.</li></ul>" +
+        "<p>The nature and purpose of this research have been sufficiently explained and I agree to participate in this study.  I understand that I am free to withdraw at any time without incurring any penalty.</p>" +
+        "<p>Please consent by clicking the button below to continue. Otherwise, please exit the study at this time.</p></div>",
+      data: {
+        test_part: 'instructions'
+      }
+    };
+    timeline.push(consent);
+
+
+    timeline.push({
+      type: 'fullscreen',
+      fullscreen_mode: true,
+      data: {
+        test_part: 'instructions'
+      }
+    }); 
+
+    var instructions1 = {
+      type: "html-keyboard-response",
+      stimulus: "<div style='word-wrap: break-word; width: 900px'><h3>Instructions</h3><p>In this experiment you will see a series of distorted images like the one below on the left. " +
+        "As you can see in the righthand image, the distorted images are derived from actual photographs." +
+        "In what follows, you will <strong>briefly</strong> be presented with <strong>only</strong> the distorted image.</p> " +
+        "<div style='float: left; margin-right: 20px;'><img src='img/018tt.jpg' height='250' width='250'></img></div>" +
+        "<div style='float: right; margin-left: 20px;'><img src='img/018gs.jpg' height='250' width='250'></img>" +
+        "</div>" +
+        "<p>Subsequently you will be asked a few questions about the image. For example, we ask" +
+        " you to make a guess on what is in the image. Note that it is OK to name just the basic level category, for example when you see a parrot in the image," +
+        " 'parrot' will obviously be a correct answer but also correct is 'bird'. However, 'animal' will <strong>not</strong> be counted as a correct response." +
+        " For the example above, 'rose' would be correct or 'flower', but not 'plant'. You do not need to describe the image in full, just name the main object in it in one or two words.</p>" +
+        "<p>Two additional questions will be asked: one question on how confident you are that you know the solution and one question on how curious you are about the solution.</p>" +
+        "<p> Next, the solution will be gradually revealed to you. Your goal is to press space <strong>as soon as</strong> you see what object is actually in the figure.</p>" +
+        "<p>Finally, you'll be asked to indicate how strong your <strong>aha-experience</strong> was. This describes the positive 'click' you sometimes experience, when the pieces of the 'puzzle' fall together and you suddenly have 'insight' in the image." +
+        "<p>Note that there are no right or wrong answers. We are interested in what <strong>you</strong> see in the image and how <strong>you</strong> feel about it.</p>" +
+        "<p>Press any key to start.</p></div>",
+      post_trial_gap: 0,
+      data: {
+        test_part: 'instructions'
+      }
+    };
+    timeline.push(instructions1);
+ */
+
+    var fixation = {
+      type: 'html-keyboard-response',
+      stimulus: '<div style="font-size:60px;">+</div>',
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 500,
+      data: {
+        test_part: 'fixation'
+      }
+    }
+
+    var pacman = {
+      type: 'pacman',
+      trial_duration: 20000,
+      threat_level: jsPsych.timelineVariable('threatLevel'),
+      data: {
+        test_part: 'pacman'
+      }
+    };
+
+
+
+    var sfm = {
+      type: 'sfm-keyboard-response',
+      fig: jsPsych.timelineVariable('fig'),
+      choices: jsPsych.timelineVariable('respKeys'),
+      sfm_level: jsPsych.timelineVariable('sfmLevel'),
+      trial_duration: 2000,
+      data: {
+        test_part: 'sfm'
+      }
+    };
+
+
+    var trial_procedure = {
+      timeline: [fixation, pacman, sfm],
+      timeline_variables: conditions,
+      repetitions: nbofrepeats,
+      randomize_order: true
+    };
+
+    timeline.push(trial_procedure);
+
+
+    /* define debrief */
+
+    var debrief = {
+      type: "html-keyboard-response",
+      stimulus: "<h1>Thank you!</h1><p>You finished the complete experiment.</p>" +
+        "<p>Press any key to return to...</p>",
+      data: {
+        test_part: 'instructions'
+      }
+    };
+    timeline.push(debrief);
+
+    /* start the experiment */
+    jsPsych.init({
+      timeline: timeline,
+      show_progress_bar: true,
+      exclusions: {
+        min_width: 800,
+        min_height: 700
+      },
+      on_finish: function () {
+        jsPsych.data.addProperties({
+          totalTime: jsPsych.totalTime()
+        });
+        //saveData("curimoon.csv", jsPsych.data.get().csv());
+      }
+    });
+  }
+</script>
+
+</html>
