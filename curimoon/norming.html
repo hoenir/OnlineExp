@@ -107,7 +107,7 @@
       images.push(stimlist[i]['solution'])
 
     }
-    
+
 
   }
 
@@ -276,7 +276,8 @@
         test_part: 'post_reveal_questions'
       },
       on_finish: function () {
-        jsPsych.setProgressBar(jsPsych.data.get().last(1).select('trial_index').mean() / (5+(nb_stim_per_session*7)));
+        jsPsych.setProgressBar(jsPsych.data.get().last(1).select('trial_index').mean() / (5 + (nb_stim_per_session *
+          7)));
       }
     };
 
@@ -290,49 +291,55 @@
 
     timeline.push(trial_procedure);
 
-    qitems = ["I view challenging situations as an opportunity to grow and learn.",
-      "I am always looking for experiences that challenge how I think about myself and the world.",
-      "I seek out situations where it is likely that I will have to think in depth about something.",
-      "I enjoy learning about subjects that are unfamiliar to me.",
-      "I find it fascinating to learn new information.",
-      "Thinking about solutions to difficult conceptual problems can keep me awake at night.",
-      "I can spend hours on a single problem because I just can't rest without knowing the answer.",
-      "I feel frustrated if I can't figure out the solution to a problem, so I work even harder to solve it.",
-      "I work relentlessly at problems that I feel must be solved.",
-      "It frustrates me not having all the information I need.",
-      "The smallest doubt can stop me from seeking out new experiences.",
-      "I cannot handle the stress that comes from entering uncertain situations.",
-      "I find it hard to explore new places when I lack confidence in my abilities.",
-      "I cannot function well if I am unsure whether a new experience is safe.",
-      "It is difficult to concentrate when there is a possibility that I will be taken by surprise.",
-      "I like to learn about the habits of others.",
-      "I like finding out why people behave the way they do.",
-      "When other people are having a conversation, I like to find out what it's about.",
-      "When around other people, I like listening to their conversations.",
-      "When people quarrel, I like to know what's going on.",
-      "The anxiety of doing something new makes me feel excited and alive.",
-      "Risk-taking is exciting to me.",
-      "When I have free time, I want to do things that are a little scary.",
-      "Creating an adventure as I go is much more appealing than a planned adventure.",
-      "I prefer friends who are excitingly unpredictable.",
-      "I like exploring my surroundings.",
-      "When I smell something new, I try and find out what the odor is coming from.",
-      "I like to discover new places to go.",
-      "If I hear something rustling in the grass I have to see what it is.",
-      "I like visiting art galleries and art museums.",
-      "When I see a new fabric, I like to touch and feel it.",
-      "I like to listen to new and unusual kinds of music.",
-      "When I hear a musical instrument and I am not sure what it is, I like to see it.",
-      "I enjoy trying different kinds of ethnic foods.",
-      "When I hear a strange sound, I usually try to find out what caused it."
-    ];
+    var qitems = {
+      1: "I view challenging situations as an opportunity to grow and learn.",
+      2: "I am always looking for experiences that challenge how I think about myself and the world.",
+      3: "I seek out situations where it is likely that I will have to think in depth about something.",
+      4: "I enjoy learning about subjects that are unfamiliar to me.",
+      5: "I find it fascinating to learn new information.",
+      6: "Thinking about solutions to difficult conceptual problems can keep me awake at night.",
+      7: "I can spend hours on a single problem because I just can't rest without knowing the answer.",
+      8: "I feel frustrated if I can't figure out the solution to a problem, so I work even harder to solve it.",
+      9: "I work relentlessly at problems that I feel must be solved.",
+      10: "It frustrates me not having all the information I need.",
+      11: "The smallest doubt can stop me from seeking out new experiences.",
+      12: "I cannot handle the stress that comes from entering uncertain situations.",
+      13: "I find it hard to explore new places when I lack confidence in my abilities.",
+      14: "I cannot function well if I am unsure whether a new experience is safe.",
+      15: "It is difficult to concentrate when there is a possibility that I will be taken by surprise.",
+      16: "I like to learn about the habits of others.",
+      17: "I like finding out why people behave the way they do.",
+      18: "When other people are having a conversation, I like to find out what it's about.",
+      19: "When around other people, I like listening to their conversations.",
+      20: "When people quarrel, I like to know what's going on.",
+      21: "The anxiety of doing something new makes me feel excited and alive.",
+      22: "Risk-taking is exciting to me.",
+      23: "When I have free time, I want to do things that are a little scary.",
+      24: "Creating an adventure as I go is much more appealing than a planned adventure.",
+      25: "I prefer friends who are excitingly unpredictable.",
+      26: "I like exploring my surroundings.",
+      27: "When I smell something new, I try and find out what the odor is coming from.",
+      28: "I like to discover new places to go.",
+      29: "If I hear something rustling in the grass I have to see what it is.",
+      30: "I like visiting art galleries and art museums.",
+      31: "When I see a new fabric, I like to touch and feel it.",
+      32: "I like to listen to new and unusual kinds of music.",
+      33: "When I hear a musical instrument and I am not sure what it is, I like to see it.",
+      34: "I enjoy trying different kinds of ethnic foods.",
+      35: "When I hear a strange sound, I usually try to find out what caused it."
+    };
 
-    shuffleArray(qitems);
+    function range(start, end) {
+      return Array(end - start + 1).fill().map((_, idx) => start + idx)
+    }
+    var order = range(1, 35); // [9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+
+    shuffleArray(order);
     formattedqitems = []
 
-    for (let i = 0; i < qitems.length; i++) {
+    for (let i = 0; i < order.length; i++) {
       formattedqitems.push({
-        prompt: qitems[i],
+        prompt: qitems[order[i]],
         labels: ['Almost Never', 'Sometimes', 'Often', 'Almost Always'],
         required: true
       })
@@ -345,7 +352,7 @@
       questions: formattedqitems,
       data: {
         test_part: 'curiosity_questionnaire',
-        item_order: qitems
+        item_order: order
       }
     };
 
