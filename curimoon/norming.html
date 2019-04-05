@@ -329,10 +329,7 @@
       35: "When I hear a strange sound, I usually try to find out what caused it."
     };
 
-    function range(start, end) {
-      return Array(end - start + 1).fill().map((_, idx) => start + idx)
-    }
-    var order = range(1, 35); // [9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+    var order = Math.floor(Math.random() * (35 - 1 + 1)) + 1;
 
     shuffleArray(order);
     formattedqitems = []
