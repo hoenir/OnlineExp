@@ -1,40 +1,95 @@
+<!DOCTYPE html>
 <html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>overlap images</title>
-<style type="text/css">
-#navbar {
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center; 
-}
-#reveal {
-    background:url(img/gs/0279gs.jpg) no-repeat center;
-    height:700px;
-    left:-10px; /* play around with this */
-    position:absolute;
-    top:-10px; /* and play around with this */
-    width:700px;
-    opacity:0; 
-    animation: fadeIn 10s ease .5s forwards;
-    border: 10px solid black;
-}
+    <script src="https://unpkg.com/konva@3.2.6/konva.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Konva Mask Image Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
 
-#mooney {
-    background:url(img/tt/0279tt.jpg) no-repeat center;
-    height:700px;
-    position:relative; /* and this has to be relative */
-    width:700px;
-    border: 10px solid black;
-}
-@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;}}
+        #slider {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
 
-</style>
+        #slider2 {
+            position: absolute;
+            top: 50px;
+            left: 20px;
+        }
+    </style>
 </head>
+
 <body>
-<div id="navbar">this is the nav bar</div>
-<div id="mooney">
-<div id="reveal"></div>
-</div>
+    <div id="container"></div>
+    <input id="slider" type="range" min="0" max="40" step="0.05" value="20" />
+    <input id="slider2" type="range" min="0" max="300" step="1" value="20" />
+    <script>
+        function loadImages(sources, callback) {
+            var images = {};
+            var loadedImages = 0;
+            var numImages = 0;
+            for (var src in sources) {
+                numImages++;
+            }
+            for (var src in sources) {
+                images[src] = new Image();
+                images[src].onload = function () {
+                    if (++loadedImages >= numImages) {
+                        callback(images);
+                    }
+                };
+                images[src].src = sources[src];
+            }
+        }
+
+        function buildStage(images) {
+            var stage = new Konva.Stage({
+                container: 'container',
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+
+            var layer = new Konva.Layer();
+
+            var vader = new Konva.Image({
+                image: images.vader,
+                x: 80,
+                y: 30,
+                blurRadius: 40,
+                threshold: 20,
+                draggable: true
+            });
+
+            vader.cache();
+            vader.filters([Konva.Filters.Blur, Konva.Filters.Mask]);
+            layer.add(vader);
+            stage.add(layer);
+            var slider = document.getElementById('slider');
+            slider.oninput = function () {
+                vader.blurRadius(slider.value);
+                layer.batchDraw();
+            };
+            var slider2 = document.getElementById('slider2');
+            slider2.oninput = function () {
+                vader.threshold(slider2.value);
+                layer.batchDraw();
+            };
+        }
+
+        var sources = {
+            vader: 'img/gs/001gs.jpg'
+        };
+
+        loadImages(sources, buildStage);
+    </script>
 </body>
+
 </html>
