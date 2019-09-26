@@ -55,13 +55,19 @@ jsPsych.plugins["pacman"] = (function () {
 
         var new_html = '<canvas width="448" height="576"></canvas>';
 
-        if (threat_level == 0) {
-            var trialDuration = Math.floor(Math.random() * (35-15)) + 15;
+        var mint = 5; //minimum time of game
+        var maxt = 10; //max time of game
+        var trialDuration = Math.floor(Math.random() * (maxt - mint)) + mint;
+        var threat_level = trial.threat_level;
+
+        if (threat_level > 0) {
+            var minimum = trialDuration - 5;
         }
+
         /*
          * threat_level 0: there are no ghosts
-         * threat_level 1: Pacman speed is high and ghosts do not chase
-         * threat_level 2: normal pacman game with (intermittently) chasing ghosts
+         * threat_level 1: Pacman speed is high and ghosts do not chase. Distance to ghosts is large.
+         * threat_level 2: normal pacman speed/game with (intermittently) chasing ghosts. Distance to ghosts is small.
          */
         // draw
         display_element.innerHTML = new_html;
@@ -324,7 +330,8 @@ jsPsych.plugins["pacman"] = (function () {
             objects, // top-level entity group
             resources, // resource manager
             lives,
-            level;
+            level,
+            trialClockStart;
 
         /// miscellany
 
@@ -1867,13 +1874,13 @@ jsPsych.plugins["pacman"] = (function () {
 
             onRespawn: function () {
                 this.timer = this.repeatEvent(this.frequency, function () {
-                    if(threat_level>0){ 
-                    var ghost = Ghost.all(Ghost.STATE_INSIDE)[0];
-                    if (ghost) {
-                        debug('dot-eaten timeout');
-                        ghost.release();
+                    if (threat_level > 0) {
+                        var ghost = Ghost.all(Ghost.STATE_INSIDE)[0];
+                        if (ghost) {
+                            debug('dot-eaten timeout');
+                            ghost.release();
+                        }
                     }
-                }
                 });
             },
 
@@ -2015,15 +2022,15 @@ jsPsych.plugins["pacman"] = (function () {
                 } else if (this.direction !== newDirection) {
                     this.move(this.direction);
                 }
-                
+
             },
 
             calcSpeed: function () {
-            
+
                 if (threat_level > 0) {
                     var frightened = Ghost.all(Ghost.STATE_FRIGHTENED).length;
-                } else if (threat_level==1) {
-                        return 1.2 * MAX_SPEED
+                } else if (threat_level == 1) {
+                    return 1.2 * MAX_SPEED
                 } else frightened = 0;
 
                 return (frightened ? (level === 1 ? 0.9 :
@@ -2034,7 +2041,7 @@ jsPsych.plugins["pacman"] = (function () {
                         1)) * MAX_SPEED;
             },
 
-         
+
 
             move: function (direction) {
                 var speed = this.calcSpeed();
@@ -2140,18 +2147,19 @@ jsPsych.plugins["pacman"] = (function () {
 
         function ModeSwitcher(level) {
 
-            if (threat_level == 1){
-                this.switchDelays =[]
+            if (threat_level == 1) {
+                this.switchDelays = []
             } else {
-            this.switchDelays = [
-                toTicks(level < 5 ? 7 : 5),
-                toTicks(20),
-                toTicks(level < 5 ? 7 : 5),
-                toTicks(20),
-                toTicks(5),
-                toTicks(level === 1 ? 20 : level < 5 ? 1033 : 1037),
-                (level === 1 ? toTicks(5) : 1)
-            ];}
+                this.switchDelays = [
+                    toTicks(level < 5 ? 7 : 5),
+                    toTicks(20),
+                    toTicks(level < 5 ? 7 : 5),
+                    toTicks(20),
+                    toTicks(5),
+                    toTicks(level === 1 ? 20 : level < 5 ? 1033 : 1037),
+                    (level === 1 ? toTicks(5) : 1)
+                ];
+            }
         }
 
         ModeSwitcher.prototype = new Entity({
@@ -2162,7 +2170,7 @@ jsPsych.plugins["pacman"] = (function () {
 
             enqueueSwitch: function (n) {
                 var delay = this.switchDelays[n++];
-                
+
                 if (!delay) {
                     // finished switching
                     return;
@@ -2181,9 +2189,9 @@ jsPsych.plugins["pacman"] = (function () {
 
                     debug('mode switch (%n): %s', n, Ghost.STATE_LABELS[newState]);
 
-                    if (threat_level>0) {
+                    if (threat_level > 0) {
                         ghosties = ['blinky', 'pinky', 'inky', 'clyde']
-                    } else ghosties =[];
+                    } else ghosties = [];
 
                     ghosties.map(function (name) {
                         return getObject(name);
@@ -2273,17 +2281,17 @@ jsPsych.plugins["pacman"] = (function () {
             },
 
             onDotEaten: function () {
-                if (threat_level>0){
-                if (this._usingGlobalCounter && ++this._globalCounter === 32 &&
-                    getObject('clyde').is(Ghost.STATE_INSIDE)) {
-                    this._usingGlobalCounter = false;
-                } else {
-                    var first = Ghost.all(Ghost.STATE_INSIDE)[0];
-                    if (first) {
-                        --this.counters[first.name];
+                if (threat_level > 0) {
+                    if (this._usingGlobalCounter && ++this._globalCounter === 32 &&
+                        getObject('clyde').is(Ghost.STATE_INSIDE)) {
+                        this._usingGlobalCounter = false;
+                    } else {
+                        var first = Ghost.all(Ghost.STATE_INSIDE)[0];
+                        if (first) {
+                            --this.counters[first.name];
+                        }
                     }
                 }
-            }
             },
 
             // Check counters and return first ghost waiting for release. This happens
@@ -2821,9 +2829,9 @@ jsPsych.plugins["pacman"] = (function () {
                     insertObject('clyde', new Clyde());
                     insertObject('elroyCounter', new ElroyCounter(level, getObject('dots').dotsRemaining()));
                 }
-                
+
                 broadcast('onRespawn');
-                wait(starting ? 2 : 1, function () {
+                wait(starting ? 1 : 1, function () {
                     removeObject('readyText');
                 });
             }
@@ -2835,12 +2843,12 @@ jsPsych.plugins["pacman"] = (function () {
                     x: 9 * TILE_SIZE,
                     y: 14 * TILE_SIZE
                 });
-                wait(2, function () {
+                wait(0, function () {
                     lifeDisplay.setLives(lives - 1);
                     removeObject('playerOneText');
                     start();
                 });
-                resources.playSound('intro');
+                //resources.playSound('intro');
             } else {
                 start();
             }
@@ -2951,29 +2959,37 @@ jsPsych.plugins["pacman"] = (function () {
             }
         }
 
-        function determineEndTrial(pacman, ghosts){
+        function determineEndTrial(pacman) {
 
-            //if trialClock > 15sec
-            
-            if (threat_level==0){
-                if (trialClock >= trialDuration) {
-                    endTrial(score,trialclock)}
+            currentT = new Date().getTime() / 1000;
+            timespent = currentT - trialClockStart;
+            console.log(threat_level, timespent);
+            if (threat_level == 0) {
+                if (timespent >= trialDuration) {
+                    mode = MODE_FINISHED;
+                    end_trial(score, timespent)
+                }
             }
-            if (threat_level>0){}
-                //compute distances
-                var dists = ghosts.map(g => distance(g.col, g.row, pacman.col, pacman.row));
-                if (threat_level == 1){
-                    if (dists.some(el => el > 10) {
-                        endTrial(score,trialclock)
-                    }
-                }
-                else if (threat_level == 2){
-                    if (dists.some(el => el < 5) {
-                        endTrial(score,trialclock)
-                    }
-                }
+            if (threat_level > 0) {
 
-                    
+                if (timespent >= minimum) {
+                    ghosts = Ghost.all()
+                    //compute distances
+                    var dists = ghosts.map(g => distance(g.col, g.row, pacman.col, pacman.row));
+                    if (threat_level == 1) {
+                        if (dists.every(el => el > 10)) {
+                            mode = MODE_FINISHED;
+                            end_trial(score, timespent);
+                        }
+                    } else if (threat_level == 2) {
+                        if (dists.some(el => el < 5)) {
+                            mode = MODE_FINISHED;
+                            end_trial(score, timespent);
+                        }
+                    }
+                }
+            }
+
             return dists;
         }
 
@@ -3004,15 +3020,15 @@ jsPsych.plugins["pacman"] = (function () {
             if (mode === MODE_RUNNING) {
                 processDotCollisions(pacman, getObject('dots'));
                 processBonusCollision(pacman, getObject('bonus'));
-                if (threat_level>0){
-                    calcDistance(pacman, Ghost.all());
+                determineEndTrial(pacman);
+                if (threat_level > 0) {
                     processGhostCollisions(pacman, Ghost.all());
                     var waitingGhost = getObject('dotCounter').waitingGhost();
                     if (waitingGhost) {
                         waitingGhost.release();
                     }
                 }
-               
+
             } else if (mode === MODE_DYING && pacman.dead) {
                 lifeLost();
             }
@@ -3046,6 +3062,7 @@ jsPsych.plugins["pacman"] = (function () {
 
         function newGame() {
             window.clearTimeout(timer);
+            trialClockStart = new Date().getTime() / 1000;
 
             level = 0;
             lives = 3;
@@ -3233,6 +3250,27 @@ jsPsych.plugins["pacman"] = (function () {
             });
         });
 
+
+        //Function to end the trial proper
+        function end_trial(score, timespent) {
+
+
+
+            //Place all the data to be saved from this trial in one data object
+            var trial_data = {
+                "trial_duration": timespent, //The trial duration 
+                "score": score,
+                "threat_level": threat_level
+            };
+
+            console.log(trial_data);
+            //Remove the canvas as the child of the display_element element
+            display_element.innerHTML = '';
+
+            //End this trial and move on to the next trial
+            jsPsych.finishTrial(trial_data);
+
+        } //End of end_trial
 
     };
 

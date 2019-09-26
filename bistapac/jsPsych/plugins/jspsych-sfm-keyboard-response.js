@@ -60,6 +60,12 @@ jsPsych.plugins["sfm-keyboard-response"] = (function () {
         default: 1,
         description: 'sphere or plw'
       },
+      stimulus_duration: {
+        type: jsPsych.plugins.parameterType.INT,
+        pretty_name: 'Stimulus duration',
+        default: null,
+        description: 'How long to hide the stimulus.'
+      },
       trial_duration: {
         type: jsPsych.plugins.parameterType.INT,
         pretty_name: 'Trial duration',
@@ -136,7 +142,7 @@ jsPsych.plugins["sfm-keyboard-response"] = (function () {
       initialiseArray(); // initialize sphere array
 
     }
-    coordset = [COORDS, COORDS, COORDS] // levels (perspective) of plw fig
+    coordset = [COORDS1, COORDSmin2, COORDSmin5] // levels (perspective) of plw fig
     if (trial.fig == 'plw') {
       coordsUsed = coordset[trial.sfm_level];
       // init plw vars
@@ -263,11 +269,12 @@ jsPsych.plugins["sfm-keyboard-response"] = (function () {
       }
       //set next frame
 
-      framecounter = (counter % 2 == 0 ? framecounter : framecounter + 1);
-      counter++
-      if (counter >= nrframes * 2) {
+      //framecounter = (counter % 2 == 0 ? framecounter : framecounter + 1);
+      framecounter = framecounter+2
+      //counter++;
+      if (framecounter >= nrframes) {
         framecounter = 0;
-        counter = 0;
+        //counter = 0;
       }
     }
 
@@ -315,16 +322,18 @@ jsPsych.plugins["sfm-keyboard-response"] = (function () {
         //If stopping condition has been reached, then stop the animation
         if (stopDotMotion) {
           window.cancelAnimationFrame(frameRequestID); //Cancels the frame request
+          //Remove the canvas as the child of the display_element element
+			    display_element.innerHTML='';
         }
         //Else continue with another frame request
         else {
           frameRequestID = window.requestAnimationFrame(animate); //Calls for another frame request
 
           //If the timer has not been started and it is set, then start the timer
-          if ((!timerHasStarted) && (trial.trial_duration > 0)) {
+          if ((!timerHasStarted) && (trial.stimulus_duration > 0)) {
             //If the trial duration is set, then set a timer to count down and call the end_trial function when the time is up
             //(If the subject did not press a valid keyboard response within the trial duration, then this will end the trial)
-            timeoutID = window.setTimeout(end_trial, trial.trial_duration); //This timeoutID is then used to cancel the timeout should the subject press a valid key
+            timeoutID = window.setTimeout(function(){stopDotMotion=true; }, trial.stimulus_duration); //This timeoutID is then used to cancel the timeout should the subject press a valid key
             //The timer has started, so we set the variable to true so it does not start more timers
             timerHasStarted = true;
           }
@@ -344,6 +353,7 @@ jsPsych.plugins["sfm-keyboard-response"] = (function () {
         }
       }
     }
+
 
 
 
@@ -376,7 +386,7 @@ jsPsych.plugins["sfm-keyboard-response"] = (function () {
         "rt": response.rt, //The response time
         "key_press": response.key, //The key that the subject pressed
         "choices": trial.choices, //The set of valid keys
-        "trial_duration": trial.trial_duration, //The trial duration 
+        "stimulus_duration": trial.stimulus_duration, //The stimulus duration 
         "response_ends_trial": trial.response_ends_trial, //If the response ends the trial
         "dot_color": trial.dot_color,
         "background_color": trial.background_color,
@@ -391,9 +401,7 @@ jsPsych.plugins["sfm-keyboard-response"] = (function () {
       }
 
       console.log(trial_data);
-      //Remove the canvas as the child of the display_element element
-      display_element.innerHTML = '';
-
+     
       //Restore the settings to JsPsych defaults
       body.style.margin = originalMargin;
       body.style.padding = originalPadding;
